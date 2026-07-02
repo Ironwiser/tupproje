@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "firetrack (Supabase)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "--dart-define-from-file=dart_defines.local.json"
+      ]
+    },
+    {
+      "name": "firetrack (Supabase - Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "windows",
+      "toolArgs": [
+        "--dart-define-from-file=dart_defines.local.json"
+      ]
+    },
+    {
+      "name": "firetrack (demo)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    }
+  ]
+}
