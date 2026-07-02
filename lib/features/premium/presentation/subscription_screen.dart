@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../auth/domain/user_type.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/extensions/context_extensions.dart';
@@ -30,7 +31,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Paket seçimi')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.lg),
         children: [
           Container(
             padding: const EdgeInsets.all(4),
@@ -50,9 +51,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          SectionLabel('Plan'),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
+          const SectionLabel('Plan'),
+          const SizedBox(height: AppSpacing.xs),
           _PricingCard(
             title: 'Aylık',
             price: '$monthlyPrice ₺',
@@ -60,7 +61,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
             selected: !_yearly,
             onTap: () => setState(() => _yearly = false),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.xs),
           _PricingCard(
             title: 'Yıllık',
             price: '$yearlyPrice ₺',
@@ -69,20 +70,20 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
             selected: _yearly,
             onTap: () => setState(() => _yearly = true),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           ..._features(_planType).map(
             (f) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               child: Row(
                 children: [
                   const Icon(Icons.check, color: AppColors.primary, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(f, style: const TextStyle(fontSize: 14))),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(child: Text(f, style: Theme.of(context).textTheme.bodyMedium)),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
             label: 'Devam et',
             onPressed: () {
@@ -92,13 +93,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               context.go(_planType == UserType.corporate ? '/corporate' : '/individual');
             },
           ),
-          const SizedBox(height: 16),
-          const Row(
+          const SizedBox(height: AppSpacing.sm),
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.lock_outline, size: 15, color: AppColors.textTertiary),
-              SizedBox(width: 6),
-              Text('Güvenli ödeme altyapısı', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+              const SizedBox(width: AppSpacing.xs),
+              Text('Güvenli ödeme altyapısı', style: Theme.of(context).textTheme.labelSmall),
             ],
           ),
         ],
@@ -173,7 +174,7 @@ class _PricingCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: AppDecorations.bentoTile(accent: AppColors.primary, filled: selected),
         child: Row(
           children: [
@@ -183,28 +184,26 @@ class _PricingCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: selected ? Colors.white : AppColors.ink,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: selected ? Colors.white : AppColors.ink,
+                        ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xs),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         price,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: selected ? Colors.white : AppColors.ink,
-                        ),
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              fontSize: 24,
+                              color: selected ? Colors.white : AppColors.ink,
+                            ),
                       ),
                       Text(
                         period,
-                        style: TextStyle(
-                          color: selected ? Colors.white70 : AppColors.textSecondary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: selected ? Colors.white70 : AppColors.textSecondary,
+                            ),
                       ),
                     ],
                   ),

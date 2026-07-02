@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../../auth/domain/user_type.dart';
@@ -121,22 +123,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
               child: Row(
                 children: [
                   IconButton(
                     onPressed: () => context.go('/onboarding'),
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
-                  const Expanded(
-                    child: Text(
-                      'Giriş',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                  Expanded(
+                    child: Text('Giriş', style: AppTypography.headerTitle()),
                   ),
                 ],
               ),
@@ -146,54 +141,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Container(
               decoration: AppDecorations.contentSheet(),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.lg, AppSpacing.md, AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _useSupabase ? 'Hesabınıza bağlanın' : 'Demo modu',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 24),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       _useSupabase
                           ? 'Google ile hızlı giriş veya telefon numarası'
                           : 'Telefon numarası ile devam edin',
-                      style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.lg),
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 48,
                       child: OutlinedButton.icon(
                         onPressed: _isLoading ? null : _signInWithGoogle,
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: AppColors.surface,
-                          side: const BorderSide(color: AppColors.border),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
-                          ),
-                        ),
                         icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
-                        label: const Text('Google ile devam et', style: TextStyle(fontWeight: FontWeight.w700)),
+                        label: const Text('Google ile devam et'),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
                         Expanded(child: Container(height: 1, color: AppColors.border)),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('veya telefon', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                          child: Text('veya telefon', style: Theme.of(context).textTheme.labelSmall),
                         ),
                         Expanded(child: Container(height: 1, color: AppColors.border)),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     TextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
@@ -206,7 +190,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       enabled: !_showOtp,
                     ),
                     if (_showOtp) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.sm),
                       TextField(
                         controller: _otpController,
                         keyboardType: TextInputType.number,
@@ -218,17 +202,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     PrimaryButton(
                       label: _showOtp ? 'Giriş yap' : 'Kod gönder',
                       isLoading: _isLoading,
                       onPressed: _showOtp ? _verifyAndLogin : _sendOtp,
                     ),
-                    const SizedBox(height: 24),
-                    const Text(
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
                       'Devam ederek KVKK Aydınlatma Metni ve Kullanım Koşullarını kabul etmiş olursunuz.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textTertiary, fontSize: 11, height: 1.5),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.5),
                     ),
                   ],
                 ),

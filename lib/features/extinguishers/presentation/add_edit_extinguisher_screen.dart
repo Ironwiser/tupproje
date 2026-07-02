@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../domain/fire_extinguisher.dart';
@@ -33,6 +36,9 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
   DateTime _purchaseDate = DateTime.now().subtract(const Duration(days: 365));
   DateTime _expiryDate = DateTime.now().add(const Duration(days: 365));
   String? _photoPath;
+  String? _existingPhotoUrl;
+  Uint8List? _photoBytes;
+  bool _isSaving = false;
 
   static const _types = ['ABC Kuru Kimyevi', 'CO2', 'Köpük', 'Su Bazlı'];
   static const _locations = ['Mutfak', 'Salon', 'Depo', 'Ofis - Kat 2', 'Üretim', 'Ofis Giriş'];
@@ -60,6 +66,7 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
       _purchaseDate = item.purchaseDate;
       _expiryDate = item.expiryDate;
       _photoPath = item.photoPath;
+      _existingPhotoUrl = item.photoUrl;
     });
   }
 
@@ -73,8 +80,21 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
   }
 
   Future<void> _pickImage() async {
-    final file = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (file != null) setState(() => _photoPath = file.path);
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 82,
+    );
+    if (file != null) {
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _photoPath = file.path;
+        _photoBytes = bytes;
+        _existingPhotoUrl = null;
+      });
+    }
   }
 
   Future<void> _pickDate(bool isPurchase) async {
@@ -97,49 +117,88 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || _isSaving) return;
 
-    final extinguisher = FireExtinguisher(
-      id: _isEditing ? widget.id! : const Uuid().v4(),
-      name: _nameController.text.trim(),
-      type: _type,
-      brand: _brandController.text.trim(),
-      purchaseDate: _purchaseDate,
-      expiryDate: _expiryDate,
-      location: _location,
-      photoPath: _photoPath,
-      serialNumber: _serialController.text.trim().isEmpty ? null : _serialController.text.trim(),
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-      companyId: null,
-    );
-
-    final notifier = ref.read(extinguisherProvider.notifier);
-    final localPhoto = _photoPath;
-
-    if (_isEditing) {
-      await notifier.update(extinguisher, localPhotoPath: localPhoto);
-    } else {
-      await notifier.add(extinguisher, localPhotoPath: localPhoto);
-    }
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.delayed(const Duration(milliseconds: 80));
 
     if (!mounted) return;
-    context.showSnackBar(_isEditing ? 'Tüp güncellendi' : 'Tüp eklendi');
-    context.pop();
+    setState(() => _isSaving = true);
+
+    try {
+      final extinguisher = FireExtinguisher(
+        id: _isEditing ? widget.id! : const Uuid().v4(),
+        name: _nameController.text.trim(),
+        type: _type,
+        brand: _brandController.text.trim(),
+        purchaseDate: _purchaseDate,
+        expiryDate: _expiryDate,
+        location: _location,
+        serialNumber: _serialController.text.trim().isEmpty ? null : _serialController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        companyId: null,
+      );
+
+      final notifier = ref.read(extinguisherProvider.notifier);
+      final hasNewPhoto = _photoBytes != null;
+      final localPhoto = hasNewPhoto
+          ? _photoPath
+          : (_photoPath != null &&
+                  !_photoPath!.startsWith('http://') &&
+                  !_photoPath!.startsWith('https://') &&
+                  !_photoPath!.startsWith('blob:')
+              ? _photoPath
+              : null);
+
+      if (_isEditing) {
+        await notifier.update(
+          extinguisher,
+          localPhotoPath: localPhoto,
+          photoBytes: _photoBytes,
+        );
+      } else {
+        await notifier.add(
+          extinguisher,
+          localPhotoPath: localPhoto,
+          photoBytes: _photoBytes,
+        );
+      }
+
+      if (!mounted) return;
+      context.showSnackBar(_isEditing ? 'Tüp güncellendi' : 'Tüp eklendi');
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!mounted) return;
+      context.pop();
+    } catch (e) {
+      if (mounted) {
+        context.showSnackBar('Kaydedilemedi: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(_isEditing ? 'Tüpü düzenle' : 'Yeni tüp'),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.lg),
           children: [
-            DashedPhotoPicker(photoPath: _photoPath, onTap: _pickImage),
+            DashedPhotoPicker(
+              photoPath: _photoPath,
+              photoUrl: _existingPhotoUrl,
+              previewBytes: _photoBytes,
+              onTap: _pickImage,
+            ),
             const SizedBox(height: 24),
             FormSection(
               title: 'Temel bilgiler',
@@ -203,7 +262,11 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
               ),
             ),
             const SizedBox(height: 28),
-            PrimaryButton(label: 'Kaydet', onPressed: _save),
+            PrimaryButton(
+              label: 'Kaydet',
+              isLoading: _isSaving,
+              onPressed: _isSaving ? null : _save,
+            ),
           ],
         ),
       ),

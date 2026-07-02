@@ -109,22 +109,8 @@ create policy "extinguishers_delete"
   on public.fire_extinguishers for delete
   using (auth.uid() = user_id);
 
--- Storage bucket (Dashboard > Storage > New bucket: extinguisher-photos, public: false)
--- Aşağıdaki politikalar bucket oluşturduktan sonra çalıştırılmalı:
-
--- create policy "photo_upload_own"
---   on storage.objects for insert
---   with check (
---     bucket_id = 'extinguisher-photos'
---     and auth.uid()::text = (storage.foldername(name))[1]
---   );
---
--- create policy "photo_read_own"
---   on storage.objects for select
---   using (
---     bucket_id = 'extinguisher-photos'
---     and auth.uid()::text = (storage.foldername(name))[1]
---   );
+-- Storage: Dashboard'da `extinguisher-photos` bucket oluşturun (public: kapalı),
+-- ardından `supabase/storage.sql` dosyasını çalıştırın.
 
 -- Yeni kullanıcı kaydında boş profil oluştur
 create or replace function public.handle_new_user()

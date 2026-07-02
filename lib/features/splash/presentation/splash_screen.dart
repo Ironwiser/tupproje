@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/firetrack_logo.dart';
 import '../../auth/domain/user_type.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
@@ -40,6 +42,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           Expanded(
@@ -49,7 +52,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               color: AppColors.primary,
               child: const SafeArea(
                 child: Padding(
-                  padding: EdgeInsets.all(28),
+                  padding: EdgeInsets.all(AppSpacing.lg),
                   child: Align(
                     alignment: Alignment.bottomLeft,
                     child: FiretrackLogo(size: 72, light: true, showTagline: true),
@@ -60,35 +63,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           ),
           Expanded(
             flex: 9,
-            child: Container(
-              width: double.infinity,
-              color: AppColors.background,
-              child: const Padding(
-                padding: EdgeInsets.fromLTRB(28, 32, 28, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Güvenlik takibi\nbasitleşti.',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        height: 1.15,
-                        letterSpacing: -0.8,
-                        color: AppColors.ink,
-                      ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Güvenlik takibi\nbasitleşti.',
+                    style: AppTypography.textTheme().displaySmall,
+                  ),
+                  const Spacer(),
+                  const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
                     ),
-                    Spacer(),
-                    SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

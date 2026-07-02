@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/storage/onboarding_storage.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../auth/domain/user_type.dart';
 import '../../auth/providers/user_state_providers.dart';
 import '../../../shared/widgets/firetrack_logo.dart';
@@ -21,25 +23,20 @@ class UserTypeScreen extends ConsumerWidget {
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  FiretrackLogo(size: 48, light: true, showText: true),
-                  SizedBox(height: 28),
+                children: [
+                  const FiretrackLogo(size: 48, light: true, showText: true),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     'Kullanım türünü seçin',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
+                    style: AppTypography.headerTitle().copyWith(fontSize: 26),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Daha sonra ayarlardan değiştirebilirsiniz.',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    style: AppTypography.headerSubtitle(),
                   ),
                 ],
               ),
@@ -49,7 +46,7 @@ class UserTypeScreen extends ConsumerWidget {
             child: Container(
               width: double.infinity,
               decoration: AppDecorations.contentSheet(),
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.lg, AppSpacing.page, AppSpacing.md),
               child: Column(
                 children: [
                   _TypeOption(
@@ -58,7 +55,7 @@ class UserTypeScreen extends ConsumerWidget {
                     icon: Icons.home_work_outlined,
                     onTap: () => _select(context, ref, UserType.individual),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpacing.sm),
                   _TypeOption(
                     title: 'Kurumsal',
                     description: 'Çoklu tüp, lokasyon ve rapor',
@@ -104,30 +101,30 @@ class _TypeOption extends StatelessWidget {
         child: Ink(
           decoration: AppDecorations.panel(),
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 26),
+                  child: Icon(icon, color: AppColors.primary, size: 24),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 4),
-                      Text(description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      Text(title, style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(description, style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward, color: AppColors.primary, size: 20),
+                Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textTertiary, size: 16),
               ],
             ),
           ),

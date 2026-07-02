@@ -11,6 +11,7 @@ class FireExtinguisher {
     required this.location,
     this.photoPath,
     this.photoUrl,
+    this.photoStoragePath,
     this.serialNumber,
     this.notes,
     this.companyId,
@@ -25,6 +26,7 @@ class FireExtinguisher {
   final String location;
   final String? photoPath;
   final String? photoUrl;
+  final String? photoStoragePath;
   final String? serialNumber;
   final String? notes;
   final String? companyId;
@@ -50,6 +52,7 @@ class FireExtinguisher {
     String? location,
     String? photoPath,
     String? photoUrl,
+    String? photoStoragePath,
     String? serialNumber,
     String? notes,
     String? companyId,
@@ -64,6 +67,7 @@ class FireExtinguisher {
       location: location ?? this.location,
       photoPath: photoPath ?? this.photoPath,
       photoUrl: photoUrl ?? this.photoUrl,
+      photoStoragePath: photoStoragePath ?? this.photoStoragePath,
       serialNumber: serialNumber ?? this.serialNumber,
       notes: notes ?? this.notes,
       companyId: companyId ?? this.companyId,

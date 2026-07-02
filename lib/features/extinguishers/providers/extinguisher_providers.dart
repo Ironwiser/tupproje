@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_bootstrap.dart';
@@ -131,14 +133,18 @@ class ExtinguisherNotifier extends StateNotifier<List<FireExtinguisher>> {
     state = isSupabaseReady ? [] : _mockData;
   }
 
-  Future<void> add(FireExtinguisher extinguisher, {String? localPhotoPath}) async {
+  Future<void> add(
+    FireExtinguisher extinguisher, {
+    String? localPhotoPath,
+    Uint8List? photoBytes,
+  }) async {
     if (!isSupabaseReady || _ref.read(authRepositoryProvider).currentUser == null) {
-      state = [...state, extinguisher];
+      state = [...state, extinguisher.copyWith(photoPath: null)];
       return;
     }
 
     final user = _ref.read(authRepositoryProvider).currentUser!;
-    final profile = await _ref.read(authRepositoryProvider).fetchProfile();
+    final profile = _ref.read(cachedProfileProvider);
     final withCompany = extinguisher.copyWith(
       companyId: profile?.userType == UserType.corporate ? profile?.companyId : null,
     );
@@ -146,12 +152,17 @@ class ExtinguisherNotifier extends StateNotifier<List<FireExtinguisher>> {
     final created = await _ref.read(extinguisherRepositoryProvider).create(
           extinguisher: withCompany,
           localPhotoPath: localPhotoPath,
+          photoBytes: photoBytes,
           userId: user.id,
         );
     state = [created, ...state];
   }
 
-  Future<void> update(FireExtinguisher extinguisher, {String? localPhotoPath}) async {
+  Future<void> update(
+    FireExtinguisher extinguisher, {
+    String? localPhotoPath,
+    Uint8List? photoBytes,
+  }) async {
     if (!isSupabaseReady || _ref.read(authRepositoryProvider).currentUser == null) {
       state = [
         for (final item in state)
@@ -164,6 +175,7 @@ class ExtinguisherNotifier extends StateNotifier<List<FireExtinguisher>> {
     final updated = await _ref.read(extinguisherRepositoryProvider).update(
           extinguisher: extinguisher,
           localPhotoPath: localPhotoPath,
+          photoBytes: photoBytes,
           userId: user.id,
         );
     state = [

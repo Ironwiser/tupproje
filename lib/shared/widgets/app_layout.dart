@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 
 /// Kırmızı üst bant + altta yuvarlatılmış beyaz içerik alanı.
 class RedHeaderScaffold extends StatelessWidget {
@@ -10,6 +12,9 @@ class RedHeaderScaffold extends StatelessWidget {
     required this.header,
     required this.body,
     this.headerHeight = 200,
+    this.headerOverlap = AppDecorations.headerOverlap,
+    this.headerBackgroundAsset,
+    this.headerOverlayColors,
     this.bottomNavigationBar,
     this.floatingActionButton,
   });
@@ -17,6 +22,9 @@ class RedHeaderScaffold extends StatelessWidget {
   final Widget header;
   final Widget body;
   final double headerHeight;
+  final double headerOverlap;
+  final String? headerBackgroundAsset;
+  final List<Color>? headerOverlayColors;
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton;
 
@@ -35,12 +43,43 @@ class RedHeaderScaffold extends StatelessWidget {
             left: 0,
             right: 0,
             height: headerHeight + top,
-            child: Container(decoration: AppDecorations.redHeader()),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(AppDecorations.radiusXl),
+              ),
+              child: headerBackgroundAsset != null
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          headerBackgroundAsset!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            decoration: AppDecorations.redHeader(),
+                          ),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: headerOverlayColors ??
+                                  [
+                                    AppColors.primary.withValues(alpha: 0.18),
+                                    AppColors.primary.withValues(alpha: 0.42),
+                                  ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(decoration: AppDecorations.redHeader()),
+            ),
           ),
           Column(
             children: [
               SizedBox(height: top),
-              SizedBox(height: headerHeight - AppDecorations.headerOverlap, child: header),
+              SizedBox(height: headerHeight - headerOverlap, child: ClipRect(child: header)),
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -66,39 +105,22 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
-          Container(
-            width: 3,
-            height: 16,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              text.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
-                color: AppColors.textSecondary,
-              ),
-            ),
+            child: Text(text, style: AppTypography.sectionTitle()),
           ),
           if (action != null)
             GestureDetector(
               onTap: onAction,
               child: Text(
                 action!,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
         ],
@@ -112,41 +134,57 @@ class HeaderStatChip extends StatelessWidget {
     super.key,
     required this.value,
     required this.label,
+    this.onTap,
+    this.valueColor,
   });
 
   final String value;
   final String label;
+  final VoidCallback? onTap;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: AppDecorations.statChipOnRed(),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                height: 1,
-              ),
+    final content = Container(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: AppSpacing.xs),
+      decoration: AppDecorations.statChipOnRed(),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTypography.statValue(color: valueColor ?? AppColors.textPrimary).copyWith(
+              fontSize: 16,
+              height: 1.05,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-              ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              height: 1.15,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+
+    return Expanded(
+      child: onTap == null
+          ? content
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                splashColor: AppColors.primary.withValues(alpha: 0.08),
+                highlightColor: AppColors.primary.withValues(alpha: 0.04),
+                child: content,
+              ),
+            ),
     );
   }
 }
@@ -160,17 +198,22 @@ class TimelineDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 20,
+      width: 12,
       child: Column(
         children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          const SizedBox(height: AppSpacing.sm),
+          Center(
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
           ),
           if (!isLast)
             Expanded(
-              child: Container(width: 2, color: AppColors.border),
+              child: Center(
+                child: Container(width: 1.5, color: AppColors.border),
+              ),
             ),
         ],
       ),
@@ -192,13 +235,15 @@ class FilterTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
-      height: 40,
+      height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppDecorations.pagePadding),
         itemCount: tabs.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 20),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
         itemBuilder: (context, index) {
           final selected = index == selectedIndex;
           return GestureDetector(
@@ -206,22 +251,24 @@ class FilterTabBar extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  tabs[index],
-                  style: TextStyle(
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: (selected ? textTheme.labelLarge : textTheme.bodyMedium)!.copyWith(
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 14,
-                    color: selected ? AppColors.ink : AppColors.textTertiary,
+                    color: selected ? AppColors.textPrimary : AppColors.textTertiary,
                   ),
+                  child: Text(tabs[index]),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  height: 3,
-                  width: selected ? 24 : 0,
+                  curve: Curves.easeOutCubic,
+                  height: 2,
+                  width: selected ? 20 : 0,
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(1),
                   ),
                 ),
               ],

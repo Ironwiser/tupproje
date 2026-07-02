@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/widgets/app_bottom_nav.dart';
@@ -19,7 +22,7 @@ class ProfileScreen extends ConsumerWidget {
     final initial = userName.isNotEmpty ? userName[0].toUpperCase() : '?';
 
     return RedHeaderScaffold(
-      headerHeight: 160,
+      headerHeight: 168,
       bottomNavigationBar: const AppBottomNav(currentIndex: 3, mode: BottomNavMode.individual),
       header: Center(
         child: Column(
@@ -31,33 +34,26 @@ class ProfileScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 3),
               ),
               child: Center(
                 child: Text(
                   initial,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
-                  ),
+                  style: AppTypography.statValue(color: AppColors.primary).copyWith(fontSize: 28),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              userName,
-              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
-            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(userName, style: AppTypography.headerTitle().copyWith(fontSize: 20)),
             Text(
               isPremium ? 'Premium üye' : 'Ücretsiz plan',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
+              style: AppTypography.headerSubtitle(),
             ),
           ],
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.md, AppSpacing.page, AppSpacing.md),
         children: [
           _MenuRow(
             icon: Icons.notifications_outlined,
@@ -72,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           _MenuRow(icon: Icons.shield_outlined, title: 'Gizlilik ve KVKK', onTap: () {}),
           _MenuRow(icon: Icons.help_outline, title: 'Yardım', onTap: () {}),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           PrimaryButton(
             label: 'Çıkış yap',
             color: AppColors.inkMuted,
@@ -107,26 +103,25 @@ class _MenuRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
           child: Ink(
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: AppDecorations.panel(color: AppColors.surfaceMuted),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 14),
               child: Row(
                 children: [
                   Icon(icon, color: AppColors.primary, size: 22),
-                  const SizedBox(width: 14),
-                  Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600))),
-                  if (trailing != null) trailing!,
-                  const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15)),
+                  ),
+                  if (trailing != null) ...[trailing!, const SizedBox(width: AppSpacing.xs)],
+                  Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
                 ],
               ),
             ),

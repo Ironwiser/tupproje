@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_layout.dart';
@@ -33,10 +34,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Bildirimler')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.md),
         children: [
           const SectionLabel('Kanallar'),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.xs),
           _SettingsGroup(
             children: [
               _SwitchTile(
@@ -65,16 +66,16 @@ class NotificationSettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.md),
           const SectionLabel('Sıklık'),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.xs),
           _SettingsGroup(
             children: ReminderLevel.values.map((level) {
               final selected = reminderLevel == level;
               return InkWell(
                 onTap: () => ref.read(reminderLevelProvider.notifier).state = level,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 14),
                   child: Row(
                     children: [
                       Container(
@@ -93,11 +94,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_levelLabel(level), style: const TextStyle(fontWeight: FontWeight.w700)),
-                            Text(
-                              _levelDescription(level),
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                            ),
+                            Text(_levelLabel(level), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15)),
+                            Text(_levelDescription(level), style: Theme.of(context).textTheme.bodySmall),
                           ],
                         ),
                       ),
@@ -108,23 +106,23 @@ class NotificationSettingsScreen extends ConsumerWidget {
             }).toList(),
           ),
           if (!isPremium) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.md),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: AppDecorations.bentoTile(accent: AppColors.premiumGold),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      PremiumBadge(),
-                      SizedBox(width: 8),
-                      Text('Premium ile açın', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                      const PremiumBadge(),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('Premium ile açın', style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text('SMS ve otomatik arama özellikleri premium planda.'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text('SMS ve otomatik arama özellikleri premium planda.', style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: AppSpacing.sm),
                   PrimaryButton(
                     label: 'Planları gör',
                     onPressed: () => context.push('/subscription'),
@@ -164,13 +162,17 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.panel(),
-      child: Column(
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
-            children[i],
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
+              children[i],
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -196,8 +198,8 @@ class _SwitchTile extends StatelessWidget {
     return SwitchListTile(
       title: Row(
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          if (premium) ...[const SizedBox(width: 8), const PremiumBadge()],
+          Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15)),
+          if (premium) ...[const SizedBox(width: AppSpacing.xs), const PremiumBadge()],
         ],
       ),
       subtitle: Text(subtitle),

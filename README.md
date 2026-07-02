@@ -23,6 +23,7 @@ flutter run
 - Dashboard → **Storage** → New bucket
 - Ad: `extinguisher-photos`
 - Public: **kapalı**
+- SQL Editor'de `supabase/storage.sql` dosyasını çalıştırın (yükleme/okuma politikaları)
 
 ### 4. Telefon OTP (SMS) ayarı
 - Dashboard → **Authentication** → **Providers** → Phone
@@ -61,7 +62,8 @@ lib/
 ├── features/       # auth, dashboard, extinguishers, ...
 └── shared/         # Ortak widget'lar
 supabase/
-└── schema.sql      # Veritabanı şeması + RLS
+├── schema.sql      # Veritabanı şeması + RLS
+└── storage.sql     # Fotoğraf bucket politikaları
 ```
 
 ## Teknolojiler

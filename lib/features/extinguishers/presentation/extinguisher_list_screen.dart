@@ -6,6 +6,7 @@ import '../../auth/domain/user_type.dart';
 import '../providers/extinguisher_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_layout.dart';
 import '../../../shared/widgets/extinguisher_card.dart';
@@ -25,7 +26,7 @@ class ExtinguisherListScreen extends ConsumerWidget {
     final tabs = ExtinguisherFilter.values.map(_filterLabel).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surfaceMuted,
       appBar: AppBar(
         title: Text(isCorporate ? 'Tüp envanteri' : 'Tüplerim'),
         actions: [
@@ -40,7 +41,7 @@ class ExtinguisherListScreen extends ConsumerWidget {
         children: [
           if (isCorporate) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
               child: Row(
                 children: [
                   Expanded(
@@ -81,7 +82,7 @@ class ExtinguisherListScreen extends ConsumerWidget {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.xs, AppSpacing.page, 100),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];

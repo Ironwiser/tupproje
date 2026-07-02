@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../features/extinguishers/domain/fire_extinguisher.dart';
+import '../extensions/context_extensions.dart';
 import 'app_layout.dart';
 import 'common_widgets.dart';
 
@@ -40,66 +42,93 @@ class _TimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TimelineDot(color: extinguisher.status.color, isLast: isLast),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(14),
-                decoration: AppDecorations.panel(),
-                child: Row(
-                  children: [
-                    ExtinguisherThumbnail(
-                      photoPath: extinguisher.photoPath,
-                      photoUrl: extinguisher.photoUrl,
-                      size: 56,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+    final textTheme = Theme.of(context).textTheme;
+    final days = extinguisher.daysUntilExpiry;
+    final daysLabel = days < 0
+        ? '${days.abs()} gün önce doldu'
+        : days == 0
+            ? 'Bugün doluyor'
+            : '$days gün kaldı';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TimelineDot(color: extinguisher.status.color, isLast: isLast),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: AppDecorations.panel(color: AppColors.surface),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            extinguisher.name,
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                          ExtinguisherThumbnail(
+                            photoPath: extinguisher.photoPath,
+                            photoUrl: extinguisher.photoUrl,
+                            photoStoragePath: extinguisher.photoStoragePath,
+                            size: 80,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            extinguisher.location,
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  extinguisher.name,
+                                  style: textTheme.titleMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: AppSpacing.xxs),
+                                Text(
+                                  extinguisher.location,
+                                  style: textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  daysLabel,
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: extinguisher.status.color,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'STK: ${extinguisher.expiryDate.formatted}',
+                                  style: textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          StatusBadge(status: extinguisher.status, compact: true),
+                          Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
                         ],
                       ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          extinguisher.daysUntilExpiry < 0
-                              ? '${extinguisher.daysUntilExpiry.abs()}g'
-                              : '${extinguisher.daysUntilExpiry}g',
-                          style: TextStyle(
-                            color: extinguisher.status.color,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const Text('kalan', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
-                      ],
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.xs),
+                      ExtinguisherTimeBar(
+                        progress: extinguisher.remainingRatio,
+                        color: extinguisher.status.color,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -119,87 +148,197 @@ class _CorporateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TimelineDot(color: extinguisher.status.color, isLast: isLast),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: AppDecorations.insetPanel(color: AppColors.surface),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+    final textTheme = Theme.of(context).textTheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TimelineDot(color: extinguisher.status.color, isLast: isLast),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
+                  decoration: AppDecorations.insetPanel(color: AppColors.surface),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Text(
-                            extinguisher.name,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  extinguisher.name,
+                                  style: textTheme.titleMedium?.copyWith(fontSize: 14),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${extinguisher.location} · ${extinguisher.type}',
+                                  style: textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
-                          Text(
-                            '${extinguisher.location} · ${extinguisher.type}',
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                          ),
+                          StatusBadge(status: extinguisher.status, compact: true),
                         ],
                       ),
-                    ),
-                    StatusBadge(status: extinguisher.status, compact: true),
-                  ],
+                      const SizedBox(height: AppSpacing.xs),
+                      ExtinguisherTimeBar(
+                        progress: extinguisher.remainingRatio,
+                        color: extinguisher.status.color,
+                        height: 4,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Yatay kaydırmalı özet kartı (dashboard).
 class ExtinguisherMiniCard extends StatelessWidget {
-  const ExtinguisherMiniCard({super.key, required this.extinguisher, required this.onTap});
+  const ExtinguisherMiniCard({
+    super.key,
+    required this.extinguisher,
+    required this.onTap,
+    this.stacked = false,
+  });
 
   final FireExtinguisher extinguisher;
   final VoidCallback onTap;
+  final bool stacked;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 160,
-        padding: const EdgeInsets.all(14),
-        decoration: AppDecorations.panel(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+        child: Ink(
+          decoration: AppDecorations.panel(
+            color: stacked ? AppColors.surface : null,
+          ),
+          child: Padding(
+            padding: stacked
+                ? const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10)
+                : const EdgeInsets.all(AppSpacing.sm),
+            child: stacked ? _buildStackedContent(context) : _buildCompactContent(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStackedContent(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final days = extinguisher.daysUntilExpiry;
+    final daysLabel = days < 0
+        ? '${days.abs()} gün önce doldu'
+        : days == 0
+            ? 'Bugün doluyor'
+            : '$days gün kaldı';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             ExtinguisherThumbnail(
               photoPath: extinguisher.photoPath,
               photoUrl: extinguisher.photoUrl,
-              size: 48,
+              photoStoragePath: extinguisher.photoStoragePath,
+              size: 64,
             ),
-            const Spacer(),
-            Text(
-              extinguisher.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    extinguisher.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleMedium?.copyWith(fontSize: 15),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    extinguisher.location,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    daysLabel,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: extinguisher.status.color,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${extinguisher.daysUntilExpiry} gün',
-              style: TextStyle(color: extinguisher.status.color, fontWeight: FontWeight.w700, fontSize: 13),
-            ),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
           ],
         ),
+        const SizedBox(height: AppSpacing.xs),
+        ExtinguisherTimeBar(
+          progress: extinguisher.remainingRatio,
+          color: extinguisher.status.color,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactContent(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return SizedBox(
+      width: 160,
+      height: 110,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExtinguisherThumbnail(
+            photoPath: extinguisher.photoPath,
+            photoUrl: extinguisher.photoUrl,
+            photoStoragePath: extinguisher.photoStoragePath,
+            size: 44,
+          ),
+          const Spacer(),
+          Text(
+            extinguisher.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleMedium?.copyWith(fontSize: 14),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            '${extinguisher.daysUntilExpiry} gün',
+            style: textTheme.bodySmall?.copyWith(
+              color: extinguisher.status.color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

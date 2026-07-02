@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_layout.dart';
 import '../../../shared/widgets/common_widgets.dart';
@@ -47,6 +48,7 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
                     child: ExtinguisherThumbnail(
                       photoPath: extinguisher.photoPath,
                       photoUrl: extinguisher.photoUrl,
+                      photoStoragePath: extinguisher.photoStoragePath,
                       size: 120,
                       square: false,
                     ),
@@ -72,7 +74,7 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
               offset: const Offset(0, -20),
               child: Container(
                 decoration: AppDecorations.contentSheet(),
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.lg, AppSpacing.page, AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -84,22 +86,21 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
                           extinguisher.daysUntilExpiry < 0
                               ? '${extinguisher.daysUntilExpiry.abs()} gün önce doldu'
                               : '${extinguisher.daysUntilExpiry} gün kaldı',
-                          style: TextStyle(
-                            color: extinguisher.status.color,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: extinguisher.status.color,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(extinguisher.type, style: const TextStyle(color: AppColors.textSecondary)),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(extinguisher.type, style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: AppSpacing.md),
                     const SectionLabel('Bilgiler'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.xs),
                     Container(
                       decoration: AppDecorations.panel(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                       child: Column(
                         children: [
                           _InfoRow('Alım', extinguisher.purchaseDate.formatted),
@@ -118,18 +119,25 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.lg),
                     PrimaryButton(
                       label: 'Tüpü yeniledim',
                       color: AppColors.renewGreen,
                       icon: Icons.check,
                       onPressed: () => context.showSnackBar('Yenileme kaydı oluşturuldu'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.xs),
                     PrimaryButton(
                       label: 'Düzenle',
                       outlined: true,
                       onPressed: () => context.push('/extinguishers/${extinguisher.id}/edit'),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    PrimaryButton(
+                      label: 'Tüpü sil',
+                      outlined: true,
+                      color: AppColors.primary,
+                      onPressed: () => _confirmDelete(context, ref),
                     ),
                   ],
                 ),
@@ -143,6 +151,38 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
 
   Widget _divider() => const Divider(height: 1, color: AppColors.border);
 
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tüpü sil'),
+        content: const Text('Bu tüp kalıcı olarak silinecek. Emin misiniz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sil', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(extinguisherProvider.notifier).delete(id);
+      if (!context.mounted) return;
+      context.showSnackBar('Tüp silindi');
+      context.pop();
+    } catch (e) {
+      if (context.mounted) {
+        context.showSnackBar('Silinemedi: $e');
+      }
+    }
+  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -154,16 +194,16 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 110,
-            child: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            child: Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14)),
           ),
         ],
       ),

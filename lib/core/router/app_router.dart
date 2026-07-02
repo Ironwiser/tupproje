@@ -5,6 +5,7 @@ import '../../features/dashboard/presentation/corporate_dashboard_screen.dart';
 import '../../features/dashboard/presentation/individual_dashboard_screen.dart';
 import '../../features/extinguishers/presentation/add_edit_extinguisher_screen.dart';
 import '../../features/extinguishers/presentation/extinguisher_detail_screen.dart';
+import '../../features/extinguishers/presentation/expiry_calendar_screen.dart';
 import '../../features/extinguishers/presentation/extinguisher_list_screen.dart';
 import '../../features/notifications/presentation/notification_settings_screen.dart';
 import '../../features/onboarding/presentation/user_type_screen.dart';
@@ -35,6 +36,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/corporate',
       builder: (context, state) => const CorporateDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/expiry-calendar',
+      builder: (context, state) => const ExpiryCalendarScreen(),
     ),
     GoRoute(
       path: '/extinguishers',

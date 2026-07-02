@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_spacing.dart';
 
 abstract final class AppDecorations {
-  static const double radiusXs = 6;
-  static const double radiusSm = 10;
-  static const double radiusMd = 16;
-  static const double radiusLg = 24;
-  static const double radiusXl = 32;
+  static const double radiusXs = 4;
+  static const double radiusSm = 8;
+  static const double radiusMd = 12;
+  static const double radiusLg = 16;
+  static const double radiusXl = 24;
 
-  static const double pagePadding = 20;
-  static const double headerOverlap = 28;
+  static const double pagePadding = AppSpacing.page;
+  static const double headerOverlap = AppSpacing.md;
+
+  static List<BoxShadow> get shadowSm => const [
+        BoxShadow(
+          color: Color(0x0A000000),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowMd => const [
+        BoxShadow(
+          color: Color(0x0F000000),
+          blurRadius: 16,
+          offset: Offset(0, 4),
+        ),
+      ];
 
   static BorderRadius get sheetTop => const BorderRadius.vertical(
         top: Radius.circular(radiusXl),
@@ -34,13 +51,8 @@ abstract final class AppDecorations {
     return BoxDecoration(
       color: color ?? AppColors.surface,
       borderRadius: BorderRadius.circular(radiusMd),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x12000000),
-          blurRadius: 20,
-          offset: Offset(0, 8),
-        ),
-      ],
+      border: Border.all(color: AppColors.border),
+      boxShadow: shadowSm,
     );
   }
 
@@ -48,6 +60,7 @@ abstract final class AppDecorations {
     return BoxDecoration(
       color: color ?? AppColors.surfaceMuted,
       borderRadius: BorderRadius.circular(radiusSm),
+      border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
     );
   }
 
@@ -55,30 +68,81 @@ abstract final class AppDecorations {
     return BoxDecoration(
       color: filled ? accent : AppColors.surface,
       borderRadius: BorderRadius.circular(radiusMd),
-      border: filled ? null : Border.all(color: accent.withValues(alpha: 0.25)),
+      border: filled ? null : Border.all(color: accent.withValues(alpha: 0.2)),
       boxShadow: filled
           ? [
               BoxShadow(
-                color: accent.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+                color: accent.withValues(alpha: 0.22),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ]
-          : const [
-              BoxShadow(
-                color: Color(0x0D000000),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
+          : shadowSm,
+    );
+  }
+
+  static BoxDecoration premiumTile() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.premiumGoldBright,
+          AppColors.premiumGold,
+        ],
+      ),
+      borderRadius: BorderRadius.circular(radiusMd),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.premiumGoldDark.withValues(alpha: 0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
+  }
+
+  /// Parlak metalik altın — kenarlarda bronz, ortada canlı sarı-altın parlama.
+  static BoxDecoration premiumGoldMetallicCard() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          AppColors.premiumGoldDeep,
+          AppColors.premiumGoldEdge,
+          AppColors.premiumGoldShine,
+          AppColors.premiumGoldEdge,
+          AppColors.premiumGoldDeep,
+        ],
+        stops: [0.0, 0.22, 0.5, 0.78, 1.0],
+      ),
+      borderRadius: BorderRadius.circular(radiusMd),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.premiumGoldDeep.withValues(alpha: 0.3),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  static BoxDecoration premiumBadge() {
+    return BoxDecoration(
+      color: AppColors.premiumGoldDark,
+      borderRadius: BorderRadius.circular(radiusXs),
     );
   }
 
   static BoxDecoration statChipOnRed() {
     return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.16),
+      color: AppColors.surfaceMuted,
       borderRadius: BorderRadius.circular(radiusSm),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.45)),
+      boxShadow: shadowSm,
     );
   }
 }

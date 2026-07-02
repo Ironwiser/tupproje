@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../features/auth/domain/user_type.dart';
 import '../../features/extinguishers/providers/extinguisher_providers.dart';
 
@@ -35,59 +36,69 @@ class AppBottomNav extends ConsumerWidget {
             _NavItem(Icons.tune_outlined, Icons.tune, 'Ayar'),
           ]
         : const [
-            _NavItem(Icons.space_dashboard_outlined, Icons.space_dashboard, 'Özet'),
+            _NavItem(Icons.space_dashboard_outlined, Icons.space_dashboard, 'Ana sayfa'),
             _NavItem(Icons.local_fire_department_outlined, Icons.local_fire_department, 'Tüpler'),
             _NavItem(Icons.notifications_none, Icons.notifications_active, 'Uyarı'),
             _NavItem(Icons.account_circle_outlined, Icons.account_circle, 'Profil'),
           ];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Container(
-        height: 64,
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.sm),
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.ink,
+          color: AppColors.inkMuted,
           borderRadius: BorderRadius.circular(AppDecorations.radiusLg),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 24,
-              offset: Offset(0, 8),
-            ),
-          ],
+          boxShadow: AppDecorations.shadowMd,
         ),
-        child: Row(
-          children: List.generate(items.length, (i) {
-            final item = items[i];
-            final selected = i == currentIndex;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => navMode == BottomNavMode.corporate
-                    ? _onCorporateTap(context, i)
-                    : _onIndividualTap(context, i),
-                behavior: HitTestBehavior.opaque,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      selected ? item.selectedIcon : item.icon,
-                      size: 22,
-                      color: selected ? AppColors.primary : Colors.white54,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                        color: selected ? Colors.white : Colors.white54,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppDecorations.radiusLg),
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: List.generate(items.length, (i) {
+                final item = items[i];
+                final selected = i == currentIndex;
+                return Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => navMode == BottomNavMode.corporate
+                          ? _onCorporateTap(context, i)
+                          : _onIndividualTap(context, i),
+                      splashColor: Colors.white.withValues(alpha: 0.08),
+                      highlightColor: Colors.white.withValues(alpha: 0.04),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: selected ? Colors.white.withValues(alpha: 0.14) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                            ),
+                            child: Icon(
+                              selected ? item.selectedIcon : item.icon,
+                              size: 22,
+                              color: selected ? Colors.white : Colors.white54,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.label,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                                  color: selected ? Colors.white : Colors.white54,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          }),
+                  ),
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );

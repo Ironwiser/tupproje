@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../extinguishers/domain/extinguisher_status.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/extensions/context_extensions.dart';
@@ -29,11 +31,16 @@ class CorporateDashboardScreen extends ConsumerWidget {
     final expiredCount =
         extinguishers.where((e) => e.status == ExtinguisherStatus.expired).length;
 
+    void openFilter(ExtinguisherFilter filter) {
+      ref.read(extinguisherFilterProvider.notifier).state = filter;
+      context.go('/extinguishers');
+    }
+
     return RedHeaderScaffold(
-      headerHeight: 240,
+      headerHeight: 220,
       bottomNavigationBar: const AppBottomNav(currentIndex: 0, mode: BottomNavMode.corporate),
       header: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -45,51 +52,69 @@ class CorporateDashboardScreen extends ConsumerWidget {
                     children: [
                       Text(
                         companyName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: AppTypography.headerTitle(),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Kurumsal güvenlik paneli',
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text('Kurumsal güvenlik paneli', style: AppTypography.headerSubtitle()),
                     ],
                   ),
                 ),
                 IconButton(
                   onPressed: () => context.push('/notifications'),
-                  icon: const Icon(Icons.notifications_none, color: Colors.white),
+                  icon: const Icon(Icons.notifications_none_outlined, color: AppColors.textPrimary),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceMuted,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                HeaderStatChip(value: '$total', label: 'Toplam'),
-                const SizedBox(width: 8),
-                HeaderStatChip(value: '$okCount', label: 'Uygun'),
+                HeaderStatChip(
+                  value: '$total',
+                  label: 'Toplam',
+                  onTap: () => openFilter(ExtinguisherFilter.all),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                HeaderStatChip(
+                  value: '$okCount',
+                  label: 'Uygun',
+                  valueColor: AppColors.statusOk,
+                  onTap: () => openFilter(ExtinguisherFilter.ok),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
-                HeaderStatChip(value: '$approachingCount', label: 'Yaklaşan'),
-                const SizedBox(width: 8),
-                HeaderStatChip(value: '$expiredCount', label: 'Dolmuş'),
+                HeaderStatChip(
+                  value: '$approachingCount',
+                  label: 'Yaklaşan',
+                  valueColor: AppColors.statusWarning,
+                  onTap: () => openFilter(ExtinguisherFilter.approaching),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                HeaderStatChip(
+                  value: '$expiredCount',
+                  label: 'Dolmuş',
+                  valueColor: AppColors.statusExpired,
+                  onTap: () => openFilter(ExtinguisherFilter.expired),
+                ),
               ],
             ),
           ],
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.md, AppSpacing.page, AppSpacing.md),
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: AppDecorations.panel(),
             child: Column(
               children: [
@@ -97,11 +122,16 @@ class CorporateDashboardScreen extends ConsumerWidget {
                 SizedBox(
                   height: 180,
                   child: total == 0
-                      ? const Center(child: Text('Henüz tüp yok', style: TextStyle(color: AppColors.textSecondary)))
+                      ? Center(
+                          child: Text(
+                            'Henüz tüp yok',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        )
                       : PieChart(
                           PieChartData(
                             sectionsSpace: 2,
-                            centerSpaceRadius: 50,
+                            centerSpaceRadius: 48,
                             sections: [
                               if (okCount > 0)
                                 _pieSection(okCount, total, AppColors.statusOk),
@@ -116,9 +146,9 @@ class CorporateDashboardScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md),
           const SectionLabel('Hızlı işlemler'),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
               _ActionTile(
@@ -126,13 +156,13 @@ class CorporateDashboardScreen extends ConsumerWidget {
                 label: 'Tüp ekle',
                 onTap: () => context.push('/extinguishers/add'),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.xs),
               _ActionTile(
                 icon: Icons.list_alt,
                 label: 'Tüm tüpler',
                 onTap: () => context.go('/extinguishers'),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.xs),
               _ActionTile(
                 icon: Icons.download_outlined,
                 label: 'Rapor',
@@ -150,8 +180,8 @@ class CorporateDashboardScreen extends ConsumerWidget {
       value: count.toDouble(),
       color: color,
       title: '${((count / total) * 100).round()}%',
-      radius: 46,
-      titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 11),
+      radius: 44,
+      titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 11),
     );
   }
 }
@@ -166,17 +196,23 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: AppDecorations.insetPanel(color: AppColors.surface),
-          child: Column(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 22),
-              const SizedBox(height: 8),
-              Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-            ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+          child: Ink(
+            decoration: AppDecorations.insetPanel(color: AppColors.surface),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                children: [
+                  Icon(icon, color: AppColors.primary, size: 22),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(label, style: Theme.of(context).textTheme.labelSmall),
+                ],
+              ),
+            ),
           ),
         ),
       ),
