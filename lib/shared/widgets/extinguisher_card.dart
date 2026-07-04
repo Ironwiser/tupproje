@@ -4,7 +4,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../features/extinguishers/domain/fire_extinguisher.dart';
-import '../extensions/context_extensions.dart';
 import 'app_layout.dart';
 import 'common_widgets.dart';
 
@@ -54,7 +53,7 @@ class _TimelineCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+        borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,20 +62,19 @@ class _TimelineCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Container(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: AppDecorations.panel(color: AppColors.surface),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
+                  decoration: AppDecorations.insetPanel(color: AppColors.surface),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ExtinguisherThumbnail(
                             photoPath: extinguisher.photoPath,
                             photoUrl: extinguisher.photoUrl,
                             photoStoragePath: extinguisher.photoStoragePath,
-                            size: 80,
+                            size: 40,
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Expanded(
@@ -85,29 +83,12 @@ class _TimelineCard extends StatelessWidget {
                               children: [
                                 Text(
                                   extinguisher.name,
-                                  style: textTheme.titleMedium,
+                                  style: textTheme.titleMedium?.copyWith(fontSize: 14),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: AppSpacing.xxs),
                                 Text(
-                                  extinguisher.location,
-                                  style: textTheme.bodySmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  daysLabel,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: extinguisher.status.color,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'STK: ${extinguisher.expiryDate.formatted}',
+                                  '${extinguisher.location} · $daysLabel',
                                   style: textTheme.bodySmall,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -115,13 +96,14 @@ class _TimelineCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+                          StatusBadge(status: extinguisher.status, compact: true),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       ExtinguisherTimeBar(
                         progress: extinguisher.remainingRatio,
                         color: extinguisher.status.color,
+                        height: 4,
                       ),
                     ],
                   ),
@@ -171,6 +153,13 @@ class _CorporateRow extends StatelessWidget {
                     children: [
                       Row(
                         children: [
+                          ExtinguisherThumbnail(
+                            photoPath: extinguisher.photoPath,
+                            photoUrl: extinguisher.photoUrl,
+                            photoStoragePath: extinguisher.photoStoragePath,
+                            size: 40,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,8 +1,8 @@
--- FIRETRACK Storage — extinguisher-photos bucket politikaları
--- Önce Dashboard > Storage > New bucket:
---   Ad: extinguisher-photos
---   Public: KAPALI
--- Sonra bu dosyayı SQL Editor'de çalıştırın.
+-- firetrack storage, extinguisher-photos bucket politikaları
+-- önce dashboard > storage > new bucket:
+--   ad: extinguisher-photos
+--   public: kapalı
+-- sonra bu dosyayı sql editorde çalıştır
 
 drop policy if exists "photo_upload_own" on storage.objects;
 create policy "photo_upload_own"

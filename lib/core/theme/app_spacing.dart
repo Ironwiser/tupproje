@@ -1,4 +1,4 @@
-/// 8px tabanlı boşluk sistemi.
+/// 8px tabanlı spacing
 abstract final class AppSpacing {
   static const double unit = 8;
 

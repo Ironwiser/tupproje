@@ -126,7 +126,7 @@ class AppBottomNav extends ConsumerWidget {
       case 2:
         context.push('/subscription');
       case 3:
-        context.go('/notifications');
+        context.go('/profile');
     }
   }
 }

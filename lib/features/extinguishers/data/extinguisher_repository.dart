@@ -116,7 +116,7 @@ class ExtinguisherRepository {
       try {
         await _client.storage.from(_photoBucket).remove([storagePath]);
       } catch (_) {
-        // Kayıt silinsin; storage hatası engel olmasın.
+        // kayıt silinsin, storage hatası engel olmasın
       }
     }
 
@@ -176,7 +176,7 @@ class ExtinguisherRepository {
       'location': extinguisher.location,
       'serial_number': extinguisher.serialNumber,
       'notes': extinguisher.notes,
-      if (photoStoragePath != null) 'photo_url': photoStoragePath,
+      'photo_url': ?photoStoragePath,
     };
   }
 

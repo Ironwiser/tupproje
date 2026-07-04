@@ -20,6 +20,7 @@ dependencies:
   uuid: ^4.5.1
   supabase_flutter: ^2.9.1
   shared_preferences: ^2.5.3
+  app_links: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -29,7 +30,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/header/anasayfaimg.png
-    - assets/images/header/firebg.png
-    - assets/images/header/fireprotection.png
-    - assets/images/header/goldtexture.png
+    # klasör bazlı + slider mock'ları açıkça (web debug'da yeni dosya için flutter run tam restart şart, R yetmez)
+    - assets/images/header/
+    - assets/images/header/tupdolummock2.png
+    - assets/images/header/celikburunmock2.png
+    - assets/images/header/kaskmock2.png
+    - assets/images/header/detektormock3.png

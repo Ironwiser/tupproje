@@ -118,45 +118,42 @@ class IndividualDashboardScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, AppSpacing.md),
           children: [
+            const DashboardAdSlider(),
             if (nearest != null) ...[
+              const SizedBox(height: AppSpacing.xs),
               AlertBannerCard(
                 extinguisher: nearest,
                 alertCount: approachingCount,
                 onTap: () => context.push('/extinguishers/${nearest.id}'),
               ),
               const SizedBox(height: AppSpacing.sm),
-            ],
+            ] else
+              const SizedBox(height: AppSpacing.sm),
             SizedBox(
               height: 48,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => context.push('/expiry-calendar'),
-                        borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
-                        child: Ink(
-                          decoration: AppDecorations.bentoTile(accent: const Color(0xFF5C6B8A)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                            child: Center(
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.calendar_month_outlined, color: Color(0xFF5C6B8A), size: 20),
-                                  const SizedBox(width: AppSpacing.xs),
-                                  Flexible(
-                                    child: Text(
-                                      'SKT çizelgesi',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 14),
-                                    ),
-                                  ),
-                                ],
+                    child: ElevationInkTile(
+                      onTap: () => context.push('/expiry-calendar'),
+                      decoration: AppDecorations.bentoTileFill(accent: const Color(0xFF5C6B8A)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                        child: Center(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_month_outlined, color: Color(0xFF5C6B8A), size: 20),
+                              const SizedBox(width: AppSpacing.xs),
+                              Flexible(
+                                child: Text(
+                                  'SKT çizelgesi',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 14),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -178,6 +175,8 @@ class IndividualDashboardScreen extends ConsumerWidget {
               width: double.infinity,
               child: Material(
                 color: Colors.transparent,
+                clipBehavior: Clip.antiAlias,
+                borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
                 child: InkWell(
                   onTap: () => context.push('/extinguishers/add'),
                   borderRadius: BorderRadius.circular(AppDecorations.radiusMd),

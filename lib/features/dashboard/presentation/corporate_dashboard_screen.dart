@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -12,6 +13,7 @@ import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_layout.dart';
+import '../../../shared/widgets/common_widgets.dart';
 
 class CorporateDashboardScreen extends ConsumerWidget {
   const CorporateDashboardScreen({super.key});
@@ -37,10 +39,12 @@ class CorporateDashboardScreen extends ConsumerWidget {
     }
 
     return RedHeaderScaffold(
-      headerHeight: 220,
+      headerHeight: 118,
+      headerOverlap: 20,
+      headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: const AppBottomNav(currentIndex: 0, mode: BottomNavMode.corporate),
       header: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, 0),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,17 +56,23 @@ class CorporateDashboardScreen extends ConsumerWidget {
                     children: [
                       Text(
                         companyName,
-                        style: AppTypography.headerTitle(),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: AppTypography.headerTitle().copyWith(fontSize: 18, height: 1.15),
                       ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text('Kurumsal güvenlik paneli', style: AppTypography.headerSubtitle()),
+                      Text(
+                        'Kurumsal güvenlik paneli · $total tüp',
+                        style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
+                      ),
                     ],
                   ),
                 ),
                 IconButton(
                   onPressed: () => context.push('/notifications'),
-                  icon: const Icon(Icons.notifications_none_outlined, color: AppColors.textPrimary),
+                  icon: const Icon(Icons.notifications_none_outlined, color: AppColors.textPrimary, size: 20),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   style: IconButton.styleFrom(
                     backgroundColor: AppColors.surfaceMuted,
                     shape: RoundedRectangleBorder(
@@ -72,7 +82,7 @@ class CorporateDashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xxs),
             Row(
               children: [
                 HeaderStatChip(
@@ -87,11 +97,7 @@ class CorporateDashboardScreen extends ConsumerWidget {
                   valueColor: AppColors.statusOk,
                   onTap: () => openFilter(ExtinguisherFilter.ok),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Row(
-              children: [
+                const SizedBox(width: AppSpacing.xs),
                 HeaderStatChip(
                   value: '$approachingCount',
                   label: 'Yaklaşan',
@@ -110,67 +116,94 @@ class CorporateDashboardScreen extends ConsumerWidget {
           ],
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.md, AppSpacing.page, AppSpacing.md),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: AppDecorations.panel(),
-            child: Column(
+      body: Container(
+        color: AppColors.surfaceMuted,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, AppSpacing.md),
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: AppDecorations.panel(),
+              child: Column(
+                children: [
+                  const SectionLabel('Durum dağılımı'),
+                  SizedBox(
+                    height: 180,
+                    child: total == 0
+                        ? Center(
+                            child: Text(
+                              'Henüz tüp yok',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          )
+                        : PieChart(
+                            PieChartData(
+                              sectionsSpace: 2,
+                              centerSpaceRadius: 48,
+                              sections: [
+                                if (okCount > 0)
+                                  _pieSection(okCount, total, AppColors.statusOk),
+                                if (approachingCount > 0)
+                                  _pieSection(approachingCount, total, AppColors.statusWarning),
+                                if (expiredCount > 0)
+                                  _pieSection(expiredCount, total, AppColors.statusExpired),
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
               children: [
-                const SectionLabel('Durum dağılımı'),
-                SizedBox(
-                  height: 180,
-                  child: total == 0
-                      ? Center(
-                          child: Text(
-                            'Henüz tüp yok',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        )
-                      : PieChart(
-                          PieChartData(
-                            sectionsSpace: 2,
-                            centerSpaceRadius: 48,
-                            sections: [
-                              if (okCount > 0)
-                                _pieSection(okCount, total, AppColors.statusOk),
-                              if (approachingCount > 0)
-                                _pieSection(approachingCount, total, AppColors.statusWarning),
-                              if (expiredCount > 0)
-                                _pieSection(expiredCount, total, AppColors.statusExpired),
-                            ],
-                          ),
-                        ),
+                _ActionTile(
+                  icon: Icons.list_alt,
+                  label: 'Tüm tüpler',
+                  onTap: () => context.go('/extinguishers'),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                _ActionTile(
+                  icon: Icons.download_outlined,
+                  label: 'Rapor',
+                  onTap: () => context.showSnackBar('Rapor özelliği yakında'),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const SectionLabel('Hızlı işlemler'),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            children: [
-              _ActionTile(
-                icon: Icons.add,
-                label: 'Tüp ekle',
-                onTap: () => context.push('/extinguishers/add'),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              height: 48,
+              width: double.infinity,
+              child: Material(
+                color: Colors.transparent,
+                clipBehavior: Clip.antiAlias,
+                borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+                child: InkWell(
+                  onTap: () => context.push('/extinguishers/add'),
+                  borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+                  child: FireButtonSurface(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.add_circle_outline, color: Colors.white, size: 22),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              'Yeni tüp ekle',
+                              style: AppTypography.headerTitle().copyWith(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: AppSpacing.xs),
-              _ActionTile(
-                icon: Icons.list_alt,
-                label: 'Tüm tüpler',
-                onTap: () => context.go('/extinguishers'),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              _ActionTile(
-                icon: Icons.download_outlined,
-                label: 'Rapor',
-                onTap: () => context.showSnackBar('Rapor özelliği yakında'),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,6 +231,8 @@ class _ActionTile extends StatelessWidget {
     return Expanded(
       child: Material(
         color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppDecorations.radiusSm),

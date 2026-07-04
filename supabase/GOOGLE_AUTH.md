@@ -23,6 +23,7 @@
 3. **Authentication** → **URL Configuration** → **Redirect URLs** ekleyin:
    ```
    com.firetrack.firetrack://login-callback
+   com.firetrack.firetrack://login-callback/
    http://localhost:**
    ```
    (Chrome'da test için localhost portu değişebilir; çalıştırdığınız adresi ekleyin)

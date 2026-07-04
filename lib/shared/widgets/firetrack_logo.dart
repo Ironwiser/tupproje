@@ -75,7 +75,7 @@ class FiretrackLogo extends StatelessWidget {
   }
 }
 
-/// Geometrik tüp silüeti — ikon yığını yerine özgün marka işareti.
+/// özgün tüp silüeti, hazır ikon yerine
 class _ExtinguisherMarkPainter extends CustomPainter {
   const _ExtinguisherMarkPainter({required this.color, this.onDark = false});
 
@@ -95,14 +95,14 @@ class _ExtinguisherMarkPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Gövde
+    // gövde
     final body = RRect.fromRectAndRadius(
       Rect.fromLTWH(w * 0.18, h * 0.22, w * 0.64, h * 0.62),
       Radius.circular(w * 0.12),
     );
     canvas.drawRRect(body, bodyPaint);
 
-    // Boyun
+    // boyun
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.34, h * 0.1, w * 0.32, h * 0.16),
@@ -111,7 +111,7 @@ class _ExtinguisherMarkPainter extends CustomPainter {
       bodyPaint,
     );
 
-    // Tutamak
+    // tutamak
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.02, h * 0.3, w * 0.2, h * 0.08),
@@ -120,10 +120,10 @@ class _ExtinguisherMarkPainter extends CustomPainter {
       accentPaint,
     );
 
-    // Hortum ucu
+    // hortum ucu
     canvas.drawCircle(Offset(w * 0.88, h * 0.34), w * 0.07, accentPaint);
 
-    // Etiket şeridi
+    // etiket şeridi
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.26, h * 0.48, w * 0.48, h * 0.1),

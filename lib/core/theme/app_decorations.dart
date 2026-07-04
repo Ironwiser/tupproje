@@ -81,6 +81,15 @@ abstract final class AppDecorations {
     );
   }
 
+  /// bentoTile dolgusu — gölge Material elevation ile verilir (web köşe hayaleti olmasın)
+  static BoxDecoration bentoTileFill({required Color accent, bool filled = false}) {
+    return BoxDecoration(
+      color: filled ? accent : AppColors.surface,
+      borderRadius: BorderRadius.circular(radiusMd),
+      border: filled ? null : Border.all(color: accent.withValues(alpha: 0.2)),
+    );
+  }
+
   static BoxDecoration premiumTile() {
     return BoxDecoration(
       gradient: const LinearGradient(
@@ -103,7 +112,7 @@ abstract final class AppDecorations {
     );
   }
 
-  /// Parlak metalik altın — kenarlarda bronz, ortada canlı sarı-altın parlama.
+  /// metalik altın gradyan, kenar bronz orta parlak
   static BoxDecoration premiumGoldMetallicCard() {
     return BoxDecoration(
       gradient: const LinearGradient(
@@ -127,6 +136,26 @@ abstract final class AppDecorations {
           offset: const Offset(0, 4),
         ),
       ],
+    );
+  }
+
+  /// premiumGoldMetallicCard dolgusu — gölge Material elevation ile verilir
+  static BoxDecoration premiumGoldMetallicFill() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          AppColors.premiumGoldDeep,
+          AppColors.premiumGoldEdge,
+          AppColors.premiumGoldShine,
+          AppColors.premiumGoldEdge,
+          AppColors.premiumGoldDeep,
+        ],
+        stops: [0.0, 0.22, 0.5, 0.78, 1.0],
+      ),
+      borderRadius: BorderRadius.circular(radiusMd),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
     );
   }
 

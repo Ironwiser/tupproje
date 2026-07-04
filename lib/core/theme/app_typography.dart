@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// Uygulama genelinde Inter font ailesi ve tipografi hiyerarşisi.
+/// inter font ailesi + tipografi hiyerarşisi
 abstract final class AppTypography {
   static TextTheme textTheme([TextTheme? base]) {
     final theme = GoogleFonts.interTextTheme(base);
@@ -75,7 +75,7 @@ abstract final class AppTypography {
     );
   }
 
-  /// Kırmızı header üzerindeki başlıklar.
+  /// kırmızı header başlıkları
   static TextStyle headerTitle({Color color = AppColors.onPrimary}) {
     return GoogleFonts.inter(
       fontSize: 22,
@@ -114,7 +114,7 @@ abstract final class AppTypography {
     );
   }
 
-  /// Altın premium kart — kalın, dar başlık.
+  /// altın kart başlığı
   static const premiumGoldTextShadow = [
     Shadow(
       color: Color(0x402B2B1A),
@@ -138,7 +138,7 @@ abstract final class AppTypography {
     );
   }
 
-  /// Altın premium kart — ince, geniş aralıklı alt metin.
+  /// altın kart alt metni, geniş harf aralığı
   static TextStyle premiumGoldCardSubtitle({Color color = AppColors.premiumGoldInk}) {
     return GoogleFonts.barlow(
       fontSize: 11,
@@ -149,7 +149,7 @@ abstract final class AppTypography {
     );
   }
 
-  /// Ana sayfa premium CTA — kompakt etiket.
+  /// ana sayfa premium buton etiketi
   static TextStyle premiumGoldCtaLabel({Color color = AppColors.premiumGoldInk}) {
     return GoogleFonts.barlowCondensed(
       fontSize: 14,

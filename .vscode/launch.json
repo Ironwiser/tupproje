@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "firetrack (Supabase)",
+      "name": "Kontrol+ (Supabase)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "name": "firetrack (Supabase - Windows)",
+      "name": "Kontrol+ (Supabase - Windows)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "name": "firetrack (demo)",
+      "name": "Kontrol+ (demo)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart"

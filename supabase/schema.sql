@@ -1,9 +1,9 @@
--- FIRETRACK Supabase şeması
--- Supabase Dashboard > SQL Editor içinde çalıştırın.
+-- firetrack supabase şeması
+-- supabase dashboard > sql editor'de çalıştır
 
 create extension if not exists "pgcrypto";
 
--- Şirketler (kurumsal hesaplar)
+-- şirketler (kurumsal hesaplar)
 create table if not exists public.companies (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -11,7 +11,7 @@ create table if not exists public.companies (
   created_at timestamptz not null default now()
 );
 
--- Kullanıcı profilleri
+-- kullanıcı profilleri
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text,
@@ -22,7 +22,7 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- Yangın tüpleri
+-- yangın tüpleri
 create table if not exists public.fire_extinguishers (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -43,12 +43,12 @@ create table if not exists public.fire_extinguishers (
 create index if not exists idx_fire_extinguishers_user_id on public.fire_extinguishers (user_id);
 create index if not exists idx_fire_extinguishers_company_id on public.fire_extinguishers (company_id);
 
--- RLS
+-- rls
 alter table public.companies enable row level security;
 alter table public.profiles enable row level security;
 alter table public.fire_extinguishers enable row level security;
 
--- Profiller
+-- profiller
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own"
   on public.profiles for select
@@ -64,7 +64,7 @@ create policy "profiles_update_own"
   on public.profiles for update
   using (auth.uid() = id);
 
--- Şirketler
+-- şirketler
 drop policy if exists "companies_select_own" on public.companies;
 create policy "companies_select_own"
   on public.companies for select
@@ -80,7 +80,7 @@ create policy "companies_update_own"
   on public.companies for update
   using (auth.uid() = owner_id);
 
--- Tüpler: bireysel (company_id null) veya kendi şirketi
+-- tüpler: bireysel (company_id null) veya aynı şirket
 drop policy if exists "extinguishers_select" on public.fire_extinguishers;
 create policy "extinguishers_select"
   on public.fire_extinguishers for select
@@ -109,10 +109,9 @@ create policy "extinguishers_delete"
   on public.fire_extinguishers for delete
   using (auth.uid() = user_id);
 
--- Storage: Dashboard'da `extinguisher-photos` bucket oluşturun (public: kapalı),
--- ardından `supabase/storage.sql` dosyasını çalıştırın.
+-- storage: önce extinguisher-photos bucket'ı oluştur (public kapalı), sonra storage.sql çalıştır
 
--- Yeni kullanıcı kaydında boş profil oluştur
+-- yeni kullanıcıda boş profil oluştur
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql

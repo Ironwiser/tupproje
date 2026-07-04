@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,8 +28,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _otpController = TextEditingController();
   bool _showOtp = false;
   bool _isLoading = false;
+  bool _waitingOAuth = false;
 
   bool get _useSupabase => isSupabaseReady;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_resumePendingOAuth());
+    });
+  }
+
+  Future<void> _resumePendingOAuth() async {
+    if (!_useSupabase || !mounted) return;
+    if (ref.read(authRepositoryProvider).currentUser == null) return;
+    setState(() {
+      _isLoading = true;
+      _waitingOAuth = true;
+    });
+    try {
+      await completeLoginAfterAuth(ref);
+      unawaited(ref.read(extinguisherProvider.notifier).ensureLoaded());
+      if (mounted) _navigateToHome();
+    } catch (e) {
+      if (mounted) context.showSnackBar('Giriş tamamlanamadı: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _waitingOAuth = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -91,21 +125,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _waitingOAuth = true;
+    });
     try {
       await ref.read(authRepositoryProvider).signInWithGoogle();
       if (kIsWeb) return;
 
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (ref.read(authRepositoryProvider).currentUser != null) {
-        await completeLoginAfterAuth(ref);
-        await ref.read(extinguisherProvider.notifier).ensureLoaded();
-        if (mounted) _navigateToHome();
+      // mobilde oauth tarayıcıda biter; dönüş AuthSessionListener'da yakalanır
+      if (mounted) {
+        context.showSnackBar('Tarayıcıda Google girişini tamamlayın, sonra uygulamaya dönün');
       }
     } catch (e) {
-      if (mounted) context.showSnackBar('Google girişi başarısız: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        context.showSnackBar('Google girişi başarısız: $e');
+        setState(() {
+          _isLoading = false;
+          _waitingOAuth = false;
+        });
+      }
     }
   }
 
@@ -162,8 +201,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 48,
                       child: OutlinedButton.icon(
                         onPressed: _isLoading ? null : _signInWithGoogle,
-                        icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
-                        label: const Text('Google ile devam et'),
+                        icon: _waitingOAuth
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
+                        label: Text(_waitingOAuth ? 'Google girişi bekleniyor…' : 'Google ile devam et'),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),

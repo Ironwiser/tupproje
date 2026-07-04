@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/auth_session_listener.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -27,12 +30,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _bootstrap() async {
     if (!mounted) return;
 
+    final pendingLogin = isSupabaseReady && await hasPendingLogin();
+
+    if (isSupabaseReady) {
+      // oauth dönüşünde cold start olursa deep link + oturum için daha uzun bekle
+      await waitForSupabaseSession(
+        ref,
+        timeout: pendingLogin ? const Duration(seconds: 10) : const Duration(seconds: 2),
+      );
+    }
+
+    if (!mounted) return;
+
     if (isSupabaseReady && ref.read(authRepositoryProvider).currentUser != null) {
       await syncProfileToState(ref);
-      await ref.read(extinguisherProvider.notifier).ensureLoaded();
+      unawaited(ref.read(extinguisherProvider.notifier).ensureLoaded());
       if (!mounted) return;
       final userType = ref.read(userTypeProvider) ?? UserType.individual;
       context.go(userType == UserType.corporate ? '/corporate' : '/individual');
+      return;
+    }
+
+    // google tarayıcıdan döndü, oturum henüz gelmediyse onboarding'e atma
+    if (pendingLogin) {
+      context.go('/login');
       return;
     }
 

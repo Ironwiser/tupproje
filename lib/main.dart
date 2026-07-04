@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,16 +11,15 @@ Future<void> _preloadFonts() async {
   try {
     await AppTypography.preload();
   } catch (_) {
-    // Font önbelleği yoksa uygulama yine de açılır.
+    // font preload patlasa da uygulama açılsın
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Future.wait([
-    bootstrapSupabase(),
-    _preloadFonts(),
-  ]);
+  // fontlar internetten iner; açılışı bekletme
+  unawaited(_preloadFonts());
+  await bootstrapSupabase();
   runApp(
     const ProviderScope(
       child: FiretrackApp(),

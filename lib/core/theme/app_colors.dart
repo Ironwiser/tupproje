@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Profesyonel nötr zemin + marka kırmızısı.
+/// nötr zemin + marka kırmızısı
 abstract final class AppColors {
   static const ink = Color(0xFF111111);
   static const inkMuted = Color(0xFF3A3A3C);

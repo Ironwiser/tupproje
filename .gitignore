@@ -49,3 +49,6 @@ app.*.map.json
 .env
 .env.local
 dart_defines.local.json
+
+# telefon kurulum paketleri (apk)
+setup/*.apk

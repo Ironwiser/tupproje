@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_colors.dart';
@@ -72,19 +74,16 @@ class FireButtonSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF4A0404).withValues(alpha: 0.28),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    final radius = BorderRadius.circular(borderRadius);
+
+    return Material(
+      color: Colors.transparent,
+      elevation: 4,
+      shadowColor: const Color(0xFF4A0404).withValues(alpha: 0.28),
+      borderRadius: radius,
+      clipBehavior: Clip.antiAlias,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: radius,
         child: Stack(
           children: [
             Positioned.fill(
@@ -92,6 +91,7 @@ class FireButtonSurface extends StatelessWidget {
                 AppAssets.fireButtonBg,
                 fit: BoxFit.cover,
                 alignment: const Alignment(0, -0.12),
+                cacheWidth: 900,
                 errorBuilder: (_, _, _) => const ColoredBox(color: AppColors.primary),
               ),
             ),
@@ -111,6 +111,47 @@ class FireButtonSurface extends StatelessWidget {
             ),
             child,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ink + boxShadow web'de köşe hayaleti yapıyor; gölgeyi Material elevation'a taşır
+class ElevationInkTile extends StatelessWidget {
+  const ElevationInkTile({
+    super.key,
+    required this.onTap,
+    required this.decoration,
+    required this.child,
+    this.borderRadius = AppDecorations.radiusMd,
+    this.elevation = 2,
+    this.shadowColor,
+  });
+
+  final VoidCallback? onTap;
+  final BoxDecoration decoration;
+  final Widget child;
+  final double borderRadius;
+  final double elevation;
+  final Color? shadowColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(borderRadius);
+
+    return Material(
+      color: Colors.transparent,
+      elevation: elevation,
+      shadowColor: shadowColor ?? const Color(0x0A000000),
+      borderRadius: radius,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: Ink(
+          decoration: decoration.copyWith(boxShadow: const []),
+          child: child,
         ),
       ),
     );
@@ -152,7 +193,7 @@ class StatusBadge extends StatelessWidget {
       };
 }
 
-/// Kalan ömür ilerleme çubuğu (alım → son kullanma aralığına göre).
+/// kalan ömür çubuğu, alım-skt aralığına göre
 class ExtinguisherTimeBar extends StatelessWidget {
   const ExtinguisherTimeBar({
     super.key,
@@ -404,6 +445,229 @@ class StatusSummaryCard extends StatelessWidget {
   }
 }
 
+/// ana sayfa uyarı ve reklam şeridi yüksekliği
+abstract final class DashboardBannerHeight {
+  static const double value = 82;
+}
+
+class DashboardAdSlider extends StatefulWidget {
+  const DashboardAdSlider({super.key});
+
+  @override
+  State<DashboardAdSlider> createState() => _DashboardAdSliderState();
+}
+
+class _DashboardAdSliderState extends State<DashboardAdSlider> {
+  static const _autoSlideDuration = Duration(seconds: 5);
+
+  final _pageController = PageController();
+  late final Timer _autoSlideTimer;
+  int _activeIndex = 0;
+
+  static final _slides = <_DashboardAdSlide>[
+    const _DashboardAdSlide(
+      imageAsset: AppAssets.dashboardAdTupDolumuMock2,
+    ),
+    const _DashboardAdSlide(
+      imageAsset: AppAssets.dashboardAdCelikburunMock2,
+    ),
+    const _DashboardAdSlide(
+      imageAsset: AppAssets.dashboardAdKaskMock2,
+    ),
+    const _DashboardAdSlide(
+      imageAsset: AppAssets.dashboardAdDetektorMock3,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _autoSlideTimer = Timer.periodic(_autoSlideDuration, (_) => _nextSlide());
+  }
+
+  @override
+  void dispose() {
+    _autoSlideTimer.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextSlide() {
+    if (!_pageController.hasClients || !mounted) return;
+    final next = (_activeIndex + 1) % _slides.length;
+    _pageController.animateToPage(
+      next,
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: DashboardBannerHeight.value,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _slides.length,
+              onPageChanged: (index) => setState(() => _activeIndex = index),
+              itemBuilder: (context, index) {
+                final slide = _slides[index];
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: slide.route.isEmpty ? null : () => context.push(slide.route),
+                    child: slide.imageAsset != null
+                        ? _DashboardAdImageSlide(asset: slide.imageAsset!)
+                        : slide.useFireSurface
+                            ? FireButtonSurface(
+                                borderRadius: 0,
+                                child: _DashboardAdSlideContent(slide: slide),
+                              )
+                            : Ink(
+                                decoration: slide.decoration,
+                                child: _DashboardAdSlideContent(slide: slide),
+                              ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            bottom: 6,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(_slides.length, (index) {
+                final active = index == _activeIndex;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: active ? 16 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: active
+                        ? AppColors.ink.withValues(alpha: 0.75)
+                        : AppColors.ink.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardAdSlide {
+  const _DashboardAdSlide({
+    this.imageAsset,
+    this.title = '',
+    this.subtitle = '',
+    this.icon = Icons.circle,
+    this.iconColor = AppColors.textPrimary,
+    this.titleColor = AppColors.textPrimary,
+    this.subtitleColor = AppColors.textSecondary,
+    this.route = '',
+    this.decoration,
+    this.useFireSurface = false,
+  });
+
+  final String? imageAsset;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+  final Color titleColor;
+  final Color subtitleColor;
+  final String route;
+  final BoxDecoration? decoration;
+  final bool useFireSurface;
+}
+
+class _DashboardAdImageSlide extends StatelessWidget {
+  const _DashboardAdImageSlide({required this.asset});
+
+  final String asset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+      alignment: Alignment.center,
+      cacheWidth: 900,
+      errorBuilder: (_, _, _) => ColoredBox(
+        color: AppColors.surfaceMuted,
+        child: Center(
+          child: Icon(Icons.image_not_supported_outlined, color: AppColors.textTertiary),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardAdSlideContent extends StatelessWidget {
+  const _DashboardAdSlideContent({required this.slide});
+
+  final _DashboardAdSlide slide;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm + 6),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: slide.useFireSurface
+                  ? Colors.white.withValues(alpha: 0.16)
+                  : slide.iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+            ),
+            child: Icon(slide.icon, color: slide.iconColor, size: 24),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  slide.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.headerTitle(color: slide.titleColor).copyWith(fontSize: 15),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  slide.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.headerSubtitle(color: slide.subtitleColor).copyWith(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right,
+            color: slide.titleColor.withValues(alpha: 0.75),
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class AlertBannerCard extends StatelessWidget {
   const AlertBannerCard({
     super.key,
@@ -418,43 +682,60 @@ class AlertBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return SizedBox(
+      height: DashboardBannerHeight.value,
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
-        child: FireButtonSurface(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
+          child: FireButtonSurface(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                    ),
+                    child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 22),
                   ),
-                  child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$alertCount tüp yaklaşıyor',
-                        style: AppTypography.headerTitle(),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        '${extinguisher.name} · ${extinguisher.daysUntilExpiry} gün',
-                        style: AppTypography.headerSubtitle(),
-                      ),
-                    ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$alertCount tüp yaklaşıyor',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headerTitle().copyWith(
+                            fontSize: 16,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${extinguisher.name} · ${extinguisher.daysUntilExpiry} gün',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headerSubtitle().copyWith(
+                            fontSize: 12,
+                            height: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.8), size: 20),
-              ],
+                  Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.8), size: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -618,38 +899,34 @@ class PremiumCtaTile extends StatelessWidget {
       shadows: AppTypography.premiumGoldTextShadow,
     );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
-        child: Ink(
-          decoration: AppDecorations.premiumGoldMetallicCard(),
-          child: SizedBox(
-            width: double.infinity,
-            height: expand ? double.infinity : 48,
-            child: Center(
-              child: Transform.translate(
-                offset: const Offset(-4, 0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.workspace_premium_rounded,
-                      color: AppColors.premiumGoldInk,
-                      size: 20,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'PREMIUM',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: labelStyle,
-                    ),
-                  ],
+    return ElevationInkTile(
+      onTap: onTap,
+      elevation: 4,
+      shadowColor: AppColors.premiumGoldDeep.withValues(alpha: 0.3),
+      decoration: AppDecorations.premiumGoldMetallicFill(),
+      child: SizedBox(
+        width: double.infinity,
+        height: expand ? double.infinity : 48,
+        child: Center(
+          child: Transform.translate(
+            offset: const Offset(-4, 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: AppColors.premiumGoldInk,
+                  size: 20,
                 ),
-              ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  'PREMIUM',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: labelStyle,
+                ),
+              ],
             ),
           ),
         ),

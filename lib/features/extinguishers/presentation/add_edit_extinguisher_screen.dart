@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_layout.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../domain/fire_extinguisher.dart';
 import '../providers/extinguisher_providers.dart';
@@ -182,92 +184,97 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Tüpü düzenle' : 'Yeni tüp'),
+    return RedHeaderScaffold(
+      headerHeight: 72,
+      headerOverlap: 16,
+      headerBackgroundAsset: AppAssets.dashboardHeaderBg,
+      header: ThemedPageHeader(
+        title: _isEditing ? 'Tüpü düzenle' : 'Yeni tüp',
+        onBack: () => context.pop(),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.lg),
-          children: [
-            DashedPhotoPicker(
-              photoPath: _photoPath,
-              photoUrl: _existingPhotoUrl,
-              previewBytes: _photoBytes,
-              onTap: _pickImage,
-            ),
-            const SizedBox(height: 24),
-            FormSection(
-              title: 'Temel bilgiler',
-              child: Column(
-                children: [
-                  _field('Tüp adı', TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(hintText: 'Örn: Mutfak tüpü'),
-                    validator: (v) => v == null || v.isEmpty ? 'Zorunlu' : null,
-                  )),
-                  const SizedBox(height: 14),
-                  _field('Marka', TextFormField(
-                    controller: _brandController,
-                    decoration: const InputDecoration(hintText: 'Marka'),
-                    validator: (v) => v == null || v.isEmpty ? 'Zorunlu' : null,
-                  )),
-                  const SizedBox(height: 14),
-                  _field('Tür', DropdownButtonFormField<String>(
-                    initialValue: _type,
-                    decoration: const InputDecoration(),
-                    items: _types.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                    onChanged: (v) => setState(() => _type = v!),
-                  )),
-                  const SizedBox(height: 14),
-                  _field('Konum', DropdownButtonFormField<String>(
-                    initialValue: _location,
-                    decoration: const InputDecoration(),
-                    items: _locations.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-                    onChanged: (v) => setState(() => _location = v!),
-                  )),
-                ],
+      body: Container(
+        color: AppColors.surfaceMuted,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, AppSpacing.lg),
+            children: [
+              DashedPhotoPicker(
+                photoPath: _photoPath,
+                photoUrl: _existingPhotoUrl,
+                previewBytes: _photoBytes,
+                onTap: _pickImage,
               ),
-            ),
-            const SizedBox(height: 20),
-            FormSection(
-              title: 'Tarihler',
-              child: Column(
-                children: [
-                  _field('Alım tarihi', _DateField(date: _purchaseDate, onTap: () => _pickDate(true))),
-                  const SizedBox(height: 14),
-                  _field('Son kullanma', _DateField(date: _expiryDate, onTap: () => _pickDate(false))),
-                ],
+              const SizedBox(height: 24),
+              FormSection(
+                title: 'Temel bilgiler',
+                child: Column(
+                  children: [
+                    _field('Tüp adı', TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(hintText: 'Örn: Mutfak tüpü'),
+                      validator: (v) => v == null || v.isEmpty ? 'Zorunlu' : null,
+                    )),
+                    const SizedBox(height: 14),
+                    _field('Marka', TextFormField(
+                      controller: _brandController,
+                      decoration: const InputDecoration(hintText: 'Marka'),
+                      validator: (v) => v == null || v.isEmpty ? 'Zorunlu' : null,
+                    )),
+                    const SizedBox(height: 14),
+                    _field('Tür', DropdownButtonFormField<String>(
+                      initialValue: _type,
+                      decoration: const InputDecoration(),
+                      items: _types.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                      onChanged: (v) => setState(() => _type = v!),
+                    )),
+                    const SizedBox(height: 14),
+                    _field('Konum', DropdownButtonFormField<String>(
+                      initialValue: _location,
+                      decoration: const InputDecoration(),
+                      items: _locations.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+                      onChanged: (v) => setState(() => _location = v!),
+                    )),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            FormSection(
-              title: 'Ek bilgi',
-              child: Column(
-                children: [
-                  _field('Seri no', TextFormField(
-                    controller: _serialController,
-                    decoration: const InputDecoration(hintText: 'Opsiyonel'),
-                  )),
-                  const SizedBox(height: 14),
-                  _field('Notlar', TextFormField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(hintText: 'Opsiyonel'),
-                  )),
-                ],
+              const SizedBox(height: 20),
+              FormSection(
+                title: 'Tarihler',
+                child: Column(
+                  children: [
+                    _field('Alım tarihi', _DateField(date: _purchaseDate, onTap: () => _pickDate(true))),
+                    const SizedBox(height: 14),
+                    _field('Son kullanma', _DateField(date: _expiryDate, onTap: () => _pickDate(false))),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 28),
-            PrimaryButton(
-              label: 'Kaydet',
-              isLoading: _isSaving,
-              onPressed: _isSaving ? null : _save,
-            ),
-          ],
+              const SizedBox(height: 20),
+              FormSection(
+                title: 'Ek bilgi',
+                child: Column(
+                  children: [
+                    _field('Seri no', TextFormField(
+                      controller: _serialController,
+                      decoration: const InputDecoration(hintText: 'Opsiyonel'),
+                    )),
+                    const SizedBox(height: 14),
+                    _field('Notlar', TextFormField(
+                      controller: _notesController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(hintText: 'Opsiyonel'),
+                    )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              PrimaryButton(
+                label: 'Kaydet',
+                isLoading: _isSaving,
+                onPressed: _isSaving ? null : _save,
+              ),
+            ],
+          ),
         ),
       ),
     );

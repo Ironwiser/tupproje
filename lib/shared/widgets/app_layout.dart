@@ -5,7 +5,7 @@ import '../../core/theme/app_decorations.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-/// Kırmızı üst bant + altta yuvarlatılmış beyaz içerik alanı.
+/// kırmızı üst bant, altta yuvarlatılmış beyaz alan
 class RedHeaderScaffold extends StatelessWidget {
   const RedHeaderScaffold({
     super.key,
@@ -54,6 +54,7 @@ class RedHeaderScaffold extends StatelessWidget {
                         Image.asset(
                           headerBackgroundAsset!,
                           fit: BoxFit.cover,
+                          cacheWidth: 1200,
                           errorBuilder: (_, _, _) => Container(
                             decoration: AppDecorations.redHeader(),
                           ),
@@ -89,6 +90,74 @@ class RedHeaderScaffold extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// kırmızı header içi başlık (geri / aksiyon opsiyonel)
+class ThemedPageHeader extends StatelessWidget {
+  const ThemedPageHeader({
+    super.key,
+    required this.title,
+    this.onBack,
+    this.trailing,
+    this.subtitle,
+  });
+
+  final String title;
+  final VoidCallback? onBack;
+  final Widget? trailing;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              if (onBack != null) ...[
+                IconButton(
+                  onPressed: onBack,
+                  icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceMuted,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.headerTitle().copyWith(fontSize: 20, height: 1.15),
+                ),
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+          if (subtitle != null)
+            Padding(
+              padding: EdgeInsets.only(left: onBack != null ? 44 : 0, top: 2),
+              child: Text(
+                subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
+              ),
+            ),
         ],
       ),
     );

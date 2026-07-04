@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
+import '../../auth/domain/user_type.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
 import '../../../shared/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_layout.dart';
@@ -18,12 +20,18 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userName = ref.watch(userNameProvider);
+    final companyName = ref.watch(companyNameProvider);
     final isPremium = ref.watch(isPremiumProvider);
-    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : '?';
+    final isCorporate = ref.watch(userTypeProvider) == UserType.corporate;
+    final displayName = isCorporate ? companyName : userName;
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
+    final navMode = isCorporate ? BottomNavMode.corporate : BottomNavMode.individual;
 
     return RedHeaderScaffold(
       headerHeight: 168,
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3, mode: BottomNavMode.individual),
+      headerOverlap: 20,
+      headerBackgroundAsset: AppAssets.dashboardHeaderBg,
+      bottomNavigationBar: AppBottomNav(currentIndex: 3, mode: navMode),
       header: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -44,44 +52,60 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(userName, style: AppTypography.headerTitle().copyWith(fontSize: 20)),
             Text(
-              isPremium ? 'Premium üye' : 'Ücretsiz plan',
-              style: AppTypography.headerSubtitle(),
+              displayName,
+              style: AppTypography.headerTitle().copyWith(fontSize: 20, height: 1.15),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              isCorporate
+                  ? (isPremium ? 'Kurumsal · Premium' : 'Kurumsal hesap')
+                  : (isPremium ? 'Premium üye' : 'Ücretsiz plan'),
+              style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
             ),
           ],
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.md, AppSpacing.page, AppSpacing.md),
-        children: [
-          _MenuRow(
-            icon: Icons.notifications_outlined,
-            title: 'Bildirim ayarları',
-            onTap: () => context.push('/notifications'),
-          ),
-          _MenuRow(
-            icon: Icons.workspace_premium_outlined,
-            title: 'Premium',
-            trailing: isPremium ? const PremiumBadge() : null,
-            onTap: () => context.push('/premium'),
-          ),
-          _MenuRow(icon: Icons.shield_outlined, title: 'Gizlilik ve KVKK', onTap: () {}),
-          _MenuRow(icon: Icons.help_outline, title: 'Yardım', onTap: () {}),
-          const SizedBox(height: AppSpacing.lg),
-          PrimaryButton(
-            label: 'Çıkış yap',
-            color: AppColors.inkMuted,
-            onPressed: () async {
-              if (isSupabaseReady) {
-                await ref.read(authRepositoryProvider).signOut();
-              }
-              clearUserSession(ref);
-              ref.read(extinguisherProvider.notifier).reset();
-              if (context.mounted) context.go('/onboarding');
-            },
-          ),
-        ],
+      body: Container(
+        color: AppColors.surfaceMuted,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, AppSpacing.md),
+          children: [
+            _MenuRow(
+              icon: Icons.notifications_outlined,
+              title: 'Bildirim ayarları',
+              onTap: () => context.push('/notifications'),
+            ),
+            _MenuRow(
+              icon: Icons.workspace_premium_outlined,
+              title: 'Premium',
+              trailing: isPremium ? const PremiumBadge() : null,
+              onTap: () => context.push('/premium'),
+            ),
+            if (isCorporate)
+              _MenuRow(
+                icon: Icons.credit_card_outlined,
+                title: 'Abonelik',
+                onTap: () => context.push('/subscription'),
+              ),
+            _MenuRow(icon: Icons.shield_outlined, title: 'Gizlilik ve KVKK', onTap: () {}),
+            _MenuRow(icon: Icons.help_outline, title: 'Yardım', onTap: () {}),
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              label: 'Çıkış yap',
+              color: AppColors.inkMuted,
+              onPressed: () async {
+                if (isSupabaseReady) {
+                  await ref.read(authRepositoryProvider).signOut();
+                }
+                clearUserSession(ref);
+                ref.read(extinguisherProvider.notifier).reset();
+                if (context.mounted) context.go('/onboarding');
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -110,7 +134,7 @@ class _MenuRow extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppDecorations.radiusMd),
           child: Ink(
-            decoration: AppDecorations.panel(color: AppColors.surfaceMuted),
+            decoration: AppDecorations.panel(color: AppColors.surface),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 14),
               child: Row(
