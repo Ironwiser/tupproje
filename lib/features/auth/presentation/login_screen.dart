@@ -6,12 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/extensions/context_extensions.dart';
+import '../../../shared/widgets/app_layout.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../../auth/domain/user_type.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
@@ -133,7 +135,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authRepositoryProvider).signInWithGoogle();
       if (kIsWeb) return;
 
-      // mobilde oauth tarayıcıda biter; dönüş AuthSessionListener'da yakalanır
       if (mounted) {
         context.showSnackBar('Tarayıcıda Google girişini tamamlayın, sonra uygulamaya dönün');
       }
@@ -155,116 +156,253 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Column(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => context.go('/onboarding'),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  Expanded(
-                    child: Text('Giriş', style: AppTypography.headerTitle()),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: AppDecorations.contentSheet(),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.lg, AppSpacing.md, AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _useSupabase ? 'Hesabınıza bağlanın' : 'Demo modu',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 24),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _useSupabase
-                          ? 'Google ile hızlı giriş veya telefon numarası'
-                          : 'Telefon numarası ile devam edin',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: OutlinedButton.icon(
-                        onPressed: _isLoading ? null : _signInWithGoogle,
-                        icon: _waitingOAuth
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
-                        label: Text(_waitingOAuth ? 'Google girişi bekleniyor…' : 'Google ile devam et'),
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return RedHeaderScaffold(
+      headerHeight: 168,
+      headerOverlap: AppSpacing.md,
+      headerBackgroundAsset: AppAssets.dashboardHeaderBg,
+      headerOverlayColors: [
+        AppColors.ink.withValues(alpha: 0.1),
+        AppColors.primary.withValues(alpha: 0.55),
+        AppColors.primaryDark.withValues(alpha: 0.8),
+      ],
+      header: _LoginPageHeader(
+        onBack: () => context.go('/onboarding'),
+        useSupabase: _useSupabase,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.page,
+          AppSpacing.sm,
+          AppSpacing.page,
+          AppSpacing.md + bottomInset,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!_useSupabase) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.borderStrong),
+                ),
+                child: Text(
+                  'DEMO MODU',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.textTheme().labelSmall?.copyWith(
+                        color: AppColors.inkMuted,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.1,
+                        fontSize: 10,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(child: Container(height: 1, color: AppColors.border)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                          child: Text('veya telefon', style: Theme.of(context).textTheme.labelSmall),
-                        ),
-                        Expanded(child: Container(height: 1, color: AppColors.border)),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        labelText: 'Telefon',
-                        prefixText: '+90 ',
-                        hintText: '5XX XXX XX XX',
-                      ),
-                      enabled: !_showOtp,
-                    ),
-                    if (_showOtp) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      TextField(
-                        controller: _otpController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        decoration: const InputDecoration(
-                          labelText: 'Doğrulama kodu',
-                          hintText: '6 haneli kod',
-                          counterText: '',
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.md),
-                    PrimaryButton(
-                      label: _showOtp ? 'Giriş yap' : 'Kod gönder',
-                      isLoading: _isLoading,
-                      onPressed: _showOtp ? _verifyAndLogin : _sendOtp,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      'Devam ederek KVKK Aydınlatma Metni ve Kullanım Koşullarını kabul etmiş olursunuz.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.5),
-                    ),
-                  ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            _GoogleSignInButton(
+              waiting: _waitingOAuth,
+              enabled: !_isLoading,
+              onPressed: _signInWithGoogle,
             ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                const Expanded(child: Divider(color: AppColors.border, height: 1)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  child: Text(
+                    'veya telefon',
+                    style: AppTypography.textTheme().labelSmall?.copyWith(
+                          color: AppColors.textTertiary,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                  ),
+                ),
+                const Expanded(child: Divider(color: AppColors.border, height: 1)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                labelText: 'Telefon',
+                prefixText: '+90 ',
+                hintText: '5XX XXX XX XX',
+              ),
+              enabled: !_showOtp && !_waitingOAuth,
+            ),
+            if (_showOtp) ...[
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: _otpController,
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                decoration: const InputDecoration(
+                  labelText: 'Doğrulama kodu',
+                  hintText: '6 haneli kod',
+                  counterText: '',
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+            PrimaryButton(
+              label: _showOtp ? 'Giriş yap' : 'Kod gönder',
+              isLoading: _isLoading && !_waitingOAuth,
+              onPressed: _waitingOAuth ? null : (_showOtp ? _verifyAndLogin : _sendOtp),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Devam ederek KVKK Aydınlatma Metni ve Kullanım Koşullarını kabul etmiş olursunuz.',
+              textAlign: TextAlign.center,
+              style: AppTypography.textTheme().labelSmall?.copyWith(
+                    color: AppColors.textTertiary,
+                    height: 1.5,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginPageHeader extends StatelessWidget {
+  const _LoginPageHeader({
+    required this.onBack,
+    required this.useSupabase,
+  });
+
+  final VoidCallback onBack;
+  final bool useSupabase;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: onBack,
+                icon: const Icon(Icons.arrow_back_rounded, color: AppColors.onPrimary, size: 20),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.onPrimary.withValues(alpha: 0.16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.onPrimary,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'ADIM 2',
+                  style: AppTypography.textTheme().labelSmall?.copyWith(
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.1,
+                        fontSize: 10,
+                        height: 1,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Giriş yap',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.textTheme().displaySmall?.copyWith(
+                  color: AppColors.onPrimary,
+                  fontSize: 26,
+                  height: 1.08,
+                  letterSpacing: -0.7,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            useSupabase ? 'Google veya telefon ile devam edin' : 'Telefon numarası ile devam edin',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.headerSubtitle().copyWith(fontSize: 13, height: 1.3),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton({
+    required this.waiting,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool waiting;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onPressed : null,
+        borderRadius: BorderRadius.circular(10),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: SizedBox(
+            height: 48,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (waiting) ...[
+                  const AppLoadingIndicator(size: 22, strokeWidth: 2.5),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'Google girişi bekleniyor…',
+                    style: AppTypography.textTheme().labelLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ] else ...[
+                  const Icon(Icons.g_mobiledata, size: 28, color: Color(0xFF4285F4)),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'Google ile devam et',
+                    style: AppTypography.textTheme().labelLarge?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

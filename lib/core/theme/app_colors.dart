@@ -16,6 +16,8 @@ abstract final class AppColors {
 
   static const corporate = primary;
   static const corporateSoft = primarySoft;
+  /// kurumsal vurgu — bireysel kırmızıdan ayrı, güven veren lacivert
+  static const corporateAccent = Color(0xFF2A4260);
 
   static const textPrimary = ink;
   static const textSecondary = Color(0xFF6E6E73);

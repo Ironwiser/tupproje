@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_session_listener.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/app_layout.dart';
+import '../../../shared/widgets/app_loading_indicator.dart';
 import '../../../shared/widgets/firetrack_logo.dart';
 import '../../auth/domain/user_type.dart';
 import '../../extinguishers/providers/extinguisher_providers.dart';
@@ -20,11 +23,27 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeIn;
+  late final Animation<double> _contentOpacity;
+
   @override
   void initState() {
     super.initState();
+    _fadeIn = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
+    _contentOpacity = CurvedAnimation(parent: _fadeIn, curve: Curves.easeOut);
+    _fadeIn.forward();
     WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+  }
+
+  @override
+  void dispose() {
+    _fadeIn.dispose();
+    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -33,7 +52,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final pendingLogin = isSupabaseReady && await hasPendingLogin();
 
     if (isSupabaseReady) {
-      // oauth dönüşünde cold start olursa deep link + oturum için daha uzun bekle
       await waitForSupabaseSession(
         ref,
         timeout: pendingLogin ? const Duration(seconds: 10) : const Duration(seconds: 2),
@@ -51,7 +69,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       return;
     }
 
-    // google tarayıcıdan döndü, oturum henüz gelmediyse onboarding'e atma
     if (pendingLogin) {
       context.go('/login');
       return;
@@ -62,51 +79,59 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          Expanded(
-            flex: 11,
-            child: Container(
-              width: double.infinity,
-              color: AppColors.primary,
-              child: const SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.lg),
-                  child: Align(
-                    alignment: Alignment.bottomLeft,
-                    child: FiretrackLogo(size: 72, light: true, showTagline: true),
-                  ),
+    return FadeTransition(
+      opacity: _contentOpacity,
+      child: RedHeaderScaffold(
+        headerHeight: 248,
+        headerOverlap: AppSpacing.lg,
+        headerBackgroundAsset: AppAssets.dashboardHeaderBg,
+        headerOverlayColors: [
+          AppColors.primary.withValues(alpha: 0.52),
+          AppColors.primaryDark.withValues(alpha: 0.78),
+        ],
+        header: const Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, 0),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: FiretrackLogo(size: 72, light: true, showTagline: true),
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.page,
+            AppSpacing.lg,
+            AppSpacing.page,
+            AppSpacing.xl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Güvenlik takibi\nbasitleşti.',
+                style: AppTypography.textTheme().displaySmall?.copyWith(
+                      height: 1.12,
+                      letterSpacing: -0.4,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Kontrol+ hazırlanıyor…',
+                style: AppTypography.textTheme().bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const Spacer(),
+              const Center(
+                child: AppLoadingIndicator(
+                  size: 44,
+                  strokeWidth: 3.2,
+                  label: 'Yükleniyor',
                 ),
               ),
-            ),
+              const Spacer(),
+            ],
           ),
-          Expanded(
-            flex: 9,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Güvenlik takibi\nbasitleşti.',
-                    style: AppTypography.textTheme().displaySmall,
-                  ),
-                  const Spacer(),
-                  const SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
