@@ -37,8 +37,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final yearlyPrice = _planType == UserType.corporate ? '899,00' : '299,00';
 
     return RedHeaderScaffold(
-      headerHeight: 72,
-      headerOverlap: 16,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: isCorporate
           ? const AppBottomNav(currentIndex: 2, mode: BottomNavMode.corporate)

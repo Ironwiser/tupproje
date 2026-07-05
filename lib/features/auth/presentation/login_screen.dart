@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/extensions/context_extensions.dart';
@@ -159,8 +160,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return RedHeaderScaffold(
-      headerHeight: 168,
-      headerOverlap: AppSpacing.md,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       headerOverlayColors: [
         AppColors.ink.withValues(alpha: 0.1),
@@ -169,7 +168,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ],
       header: _LoginPageHeader(
         onBack: () => context.go('/onboarding'),
-        useSupabase: _useSupabase,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -275,20 +273,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 class _LoginPageHeader extends StatelessWidget {
   const _LoginPageHeader({
     required this.onBack,
-    required this.useSupabase,
   });
 
   final VoidCallback onBack;
-  final bool useSupabase;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.xs),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
+    return SizedBox(
+      height: AppDecorations.pageHeaderContentHeight,
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
           Row(
             children: [
               IconButton(
@@ -329,21 +328,14 @@ class _LoginPageHeader extends StatelessWidget {
             'Giriş yap',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.textTheme().displaySmall?.copyWith(
-                  color: AppColors.onPrimary,
-                  fontSize: 26,
-                  height: 1.08,
-                  letterSpacing: -0.7,
+            style: AppTypography.headerTitle().copyWith(
+                  fontSize: 22,
+                  height: 1.12,
+                  letterSpacing: -0.4,
                 ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            useSupabase ? 'Google veya telefon ile devam edin' : 'Telefon numarası ile devam edin',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.headerSubtitle().copyWith(fontSize: 13, height: 1.3),
-          ),
         ],
+        ),
       ),
     );
   }

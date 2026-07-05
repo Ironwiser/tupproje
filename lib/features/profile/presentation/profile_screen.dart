@@ -28,43 +28,58 @@ class ProfileScreen extends ConsumerWidget {
     final navMode = isCorporate ? BottomNavMode.corporate : BottomNavMode.individual;
 
     return RedHeaderScaffold(
-      headerHeight: 168,
-      headerOverlap: 20,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: AppBottomNav(currentIndex: 3, mode: navMode),
-      header: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      header: SizedBox(
+        height: AppDecorations.pageHeaderContentHeight,
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Row(
           children: [
             Container(
-              width: 72,
-              height: 72,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 3),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
               ),
               child: Center(
                 child: Text(
                   initial,
-                  style: AppTypography.statValue(color: AppColors.primary).copyWith(fontSize: 28),
+                  style: AppTypography.statValue(color: AppColors.primary).copyWith(fontSize: 22),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              displayName,
-              style: AppTypography.headerTitle().copyWith(fontSize: 20, height: 1.15),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              isCorporate
-                  ? (isPremium ? 'Kurumsal · Premium' : 'Kurumsal hesap')
-                  : (isPremium ? 'Premium üye' : 'Ücretsiz plan'),
-              style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTypography.headerTitle().copyWith(fontSize: 18, height: 1.15),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    isCorporate
+                        ? (isPremium ? 'Kurumsal · Premium' : 'Kurumsal hesap')
+                        : (isPremium ? 'Premium üye' : 'Ücretsiz plan'),
+                    style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
+            ),
+          ),
         ),
       ),
       body: Container(

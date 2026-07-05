@@ -42,75 +42,77 @@ class IndividualDashboardScreen extends ConsumerWidget {
     }
 
     return RedHeaderScaffold(
-      headerHeight: 118,
-      headerOverlap: 20,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: const AppBottomNav(currentIndex: 0, mode: BottomNavMode.individual),
-      header: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Merhaba, $userName',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.headerTitle().copyWith(fontSize: 18, height: 1.15),
-                      ),
-                      Text(
-                        '$total kayıtlı tüp',
-                        style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => context.push('/notifications'),
-                  icon: const Icon(Icons.notifications_none_outlined, color: AppColors.textPrimary, size: 20),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surfaceMuted,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+      header: SizedBox(
+        height: AppDecorations.pageHeaderContentHeight,
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Merhaba, $userName',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headerTitle().copyWith(fontSize: 18, height: 1.15),
+                        ),
+                        Text(
+                          '$total kayıtlı tüp',
+                          style: AppTypography.headerSubtitle().copyWith(fontSize: 12, height: 1.25),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Row(
-              children: [
-                HeaderStatChip(
-                  value: '$okCount',
-                  label: 'Uygun',
-                  valueColor: AppColors.statusOk,
-                  onTap: () => openFilter(ExtinguisherFilter.ok),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                HeaderStatChip(
-                  value: '$approachingCount',
-                  label: 'Yaklaşan',
-                  valueColor: AppColors.statusWarning,
-                  onTap: () => openFilter(ExtinguisherFilter.approaching),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                HeaderStatChip(
-                  value: '$expiredCount',
-                  label: 'Dolmuş',
-                  valueColor: AppColors.statusExpired,
-                  onTap: () => openFilter(ExtinguisherFilter.expired),
-                ),
-              ],
-            ),
-          ],
+                  IconButton(
+                    onPressed: () => context.push('/notifications'),
+                    icon: const Icon(Icons.notifications_none_outlined, color: AppColors.textPrimary, size: 20),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.surfaceMuted,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  HeaderStatChip(
+                    value: '$okCount',
+                    label: 'Uygun',
+                    valueColor: AppColors.statusOk,
+                    onTap: () => openFilter(ExtinguisherFilter.ok),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  HeaderStatChip(
+                    value: '$approachingCount',
+                    label: 'Yaklaşan',
+                    valueColor: AppColors.statusWarning,
+                    onTap: () => openFilter(ExtinguisherFilter.approaching),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  HeaderStatChip(
+                    value: '$expiredCount',
+                    label: 'Dolmuş',
+                    valueColor: AppColors.statusExpired,
+                    onTap: () => openFilter(ExtinguisherFilter.expired),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: Container(

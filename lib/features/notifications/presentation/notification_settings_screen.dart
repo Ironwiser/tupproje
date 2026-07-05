@@ -34,8 +34,6 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final reminderLevel = ref.watch(reminderLevelProvider);
 
     return RedHeaderScaffold(
-      headerHeight: 72,
-      headerOverlap: 16,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: AppBottomNav(
         currentIndex: isCorporate ? 3 : 2,

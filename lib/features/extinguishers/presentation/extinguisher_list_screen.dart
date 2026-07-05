@@ -28,8 +28,6 @@ class ExtinguisherListScreen extends ConsumerWidget {
     final tabs = ExtinguisherFilter.values.map(_filterLabel).toList();
 
     return RedHeaderScaffold(
-      headerHeight: 72,
-      headerOverlap: 16,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 1,

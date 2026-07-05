@@ -185,8 +185,6 @@ class _AddEditExtinguisherScreenState extends ConsumerState<AddEditExtinguisherS
   @override
   Widget build(BuildContext context) {
     return RedHeaderScaffold(
-      headerHeight: 72,
-      headerOverlap: 16,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       header: ThemedPageHeader(
         title: _isEditing ? 'Tüpü düzenle' : 'Yeni tüp',

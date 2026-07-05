@@ -39,16 +39,18 @@ class CorporateDashboardScreen extends ConsumerWidget {
     }
 
     return RedHeaderScaffold(
-      headerHeight: 118,
-      headerOverlap: 20,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       bottomNavigationBar: const AppBottomNav(currentIndex: 0, mode: BottomNavMode.corporate),
-      header: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      header: SizedBox(
+        height: AppDecorations.pageHeaderContentHeight,
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
               children: [
                 Expanded(
                   child: Column(
@@ -82,7 +84,6 @@ class CorporateDashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xxs),
             Row(
               children: [
                 HeaderStatChip(
@@ -114,6 +115,7 @@ class CorporateDashboardScreen extends ConsumerWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
       body: Container(

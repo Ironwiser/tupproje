@@ -8,6 +8,7 @@ import '../../../core/auth/auth_session_listener.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_decorations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_layout.dart';
@@ -37,7 +38,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
     _contentOpacity = CurvedAnimation(parent: _fadeIn, curve: Curves.easeOut);
     _fadeIn.forward();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      precacheRedHeaderBackground(context);
+      unawaited(_bootstrap());
+    });
   }
 
   @override
@@ -82,18 +86,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return FadeTransition(
       opacity: _contentOpacity,
       child: RedHeaderScaffold(
-        headerHeight: 248,
-        headerOverlap: AppSpacing.lg,
         headerBackgroundAsset: AppAssets.dashboardHeaderBg,
         headerOverlayColors: [
           AppColors.primary.withValues(alpha: 0.52),
           AppColors.primaryDark.withValues(alpha: 0.78),
         ],
-        header: const Padding(
-          padding: EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.sm, AppSpacing.page, 0),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: FiretrackLogo(size: 72, light: true, showTagline: true),
+        header: SizedBox(
+          height: AppDecorations.pageHeaderContentHeight,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+            child: const Align(
+              alignment: Alignment.bottomLeft,
+              child: FiretrackLogo(size: 72, light: true, showTagline: true),
+            ),
           ),
         ),
         body: Padding(

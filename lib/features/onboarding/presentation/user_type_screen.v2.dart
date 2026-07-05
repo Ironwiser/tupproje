@@ -22,6 +22,8 @@ class UserTypeScreen extends ConsumerWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return RedHeaderScaffold(
+      headerHeight: 188,
+      headerOverlap: AppSpacing.md,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
       headerOverlayColors: [
         AppColors.ink.withValues(alpha: 0.1),
@@ -37,44 +39,48 @@ class UserTypeScreen extends ConsumerWidget {
           AppSpacing.md + bottomInset,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _PremiumTypeCard(
-              variant: _CardVariant.individual,
-              title: 'Bireysel',
-              badge: 'Kişisel',
-              description: 'Ev, daire veya tek lokasyon',
-              icon: Icons.home_work_rounded,
-              compactFeatures: true,
-              highlights: const [
-                'Tek lokasyon takibi',
-                'Son kullanma hatırlatması',
-                'Fotoğraflı tüp kaydı',
-                'SKT durumu özeti',
-                'SKT takvim görünümü',
-                'Tüp ekleme ve düzenleme',
-              ],
-              onTap: () => _select(context, ref, UserType.individual),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _PremiumTypeCard(
+                  variant: _CardVariant.individual,
+                  title: 'Bireysel',
+                  badge: 'Kişisel',
+                  description: 'Ev, daire veya tek lokasyon',
+                  icon: Icons.home_work_rounded,
+                  compactFeatures: true,
+                  highlights: const [
+                  'Tek lokasyon takibi',
+                  'Son kullanma hatırlatması',
+                  'Fotoğraflı tüp kaydı',
+                  'SKT durumu özeti',
+                  'SKT takvim görünümü',
+                  'Tüp ekleme ve düzenleme',
+                ],
+                onTap: () => _select(context, ref, UserType.individual),
+                ),
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            _PremiumTypeCard(
-              variant: _CardVariant.corporate,
-              title: 'Kurumsal',
-              badge: 'İşletme',
-              description: 'Çoklu tüp, lokasyon ve rapor',
-              icon: Icons.apartment_rounded,
-              compactFeatures: true,
-              highlights: const [
-                'Çoklu tüp yönetimi',
-                'Lokasyon bazlı filtre',
-                'Durum bazlı filtreleme',
-                'Kurumsal özet paneli',
-                'Grafikli durum analizi',
-                'Merkezi tüp envanteri',
-              ],
-              onTap: () => _select(context, ref, UserType.corporate),
+            Expanded(
+              child: _PremiumTypeCard(
+                variant: _CardVariant.corporate,
+                title: 'Kurumsal',
+                badge: 'İşletme',
+                description: 'Çoklu tüp, lokasyon ve rapor',
+                icon: Icons.apartment_rounded,
+                highlights: const [
+                  'Çoklu tüp yönetimi',
+                  'Lokasyon bazlı filtre',
+                  'Durum bazlı filtreleme',
+                  'Kurumsal özet paneli',
+                  'Grafikli durum analizi',
+                  'Merkezi tüp envanteri',
+                ],
+                onTap: () => _select(context, ref, UserType.corporate),
+              ),
             ),
-            const Spacer(),
           ],
         ),
       ),
@@ -93,19 +99,16 @@ class _OnboardingPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: AppDecorations.pageHeaderContentHeight,
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xs, AppSpacing.page, AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const FiretrackLogo(size: 40, light: true, showText: true),
+              const FiretrackLogo(size: 42, light: true, showText: true),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -131,14 +134,24 @@ class _OnboardingPageHeader extends StatelessWidget {
             'Kullanım türünü seçin',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.headerTitle().copyWith(
-                  fontSize: 22,
-                  height: 1.12,
-                  letterSpacing: -0.4,
+            style: AppTypography.textTheme().displaySmall?.copyWith(
+                  color: AppColors.onPrimary,
+                  fontSize: 26,
+                  height: 1.08,
+                  letterSpacing: -0.7,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Size en uygun modu seçin',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.headerSubtitle().copyWith(
+                  fontSize: 13,
+                  height: 1.3,
                 ),
           ),
         ],
-        ),
       ),
     );
   }

@@ -12,6 +12,12 @@ abstract final class AppDecorations {
 
   static const double pagePadding = AppSpacing.page;
   static const double headerOverlap = AppSpacing.md;
+  /// tüm sayfalarda sabit kırmızı header yüksekliği
+  static const double pageHeaderHeight = 158;
+  /// header içeriği ile beyaz sheet arası bindirme (içerik alanını küçültmez)
+  static const double pageHeaderOverlap = 40;
+
+  static double get pageHeaderContentHeight => pageHeaderHeight - pageHeaderOverlap;
 
   static List<BoxShadow> get shadowSm => const [
         BoxShadow(

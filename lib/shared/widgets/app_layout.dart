@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_decorations.dart';
 import '../../core/theme/app_spacing.dart';
@@ -11,8 +12,8 @@ class RedHeaderScaffold extends StatelessWidget {
     super.key,
     required this.header,
     required this.body,
-    this.headerHeight = 200,
-    this.headerOverlap = AppDecorations.headerOverlap,
+    this.headerHeight = AppDecorations.pageHeaderHeight,
+    this.headerOverlap = AppDecorations.pageHeaderOverlap,
     this.headerBackgroundAsset,
     this.headerOverlayColors,
     this.bottomNavigationBar,
@@ -30,57 +31,48 @@ class RedHeaderScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.of(context).padding.top;
+    final top = MediaQuery.paddingOf(context).top;
+    final headerBandHeight = headerHeight + top;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       body: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
         children: [
+          // İlk karede tam boy kırmızı bant — görsel/animasyon beklemez
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: headerHeight + top,
+            height: headerBandHeight,
+            child: const ColoredBox(color: AppColors.primary),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: headerBandHeight,
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(AppDecorations.radiusXl),
               ),
-              child: headerBackgroundAsset != null
-                  ? Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.asset(
-                          headerBackgroundAsset!,
-                          fit: BoxFit.cover,
-                          cacheWidth: 1200,
-                          errorBuilder: (_, _, _) => Container(
-                            decoration: AppDecorations.redHeader(),
-                          ),
-                        ),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: headerOverlayColors ??
-                                  [
-                                    AppColors.primary.withValues(alpha: 0.18),
-                                    AppColors.primary.withValues(alpha: 0.42),
-                                  ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Container(decoration: AppDecorations.redHeader()),
+              child: _HeaderBackground(
+                asset: headerBackgroundAsset,
+                overlayColors: headerOverlayColors,
+              ),
             ),
           ),
           Column(
             children: [
               SizedBox(height: top),
-              SizedBox(height: headerHeight - headerOverlap, child: ClipRect(child: header)),
+              SizedBox(
+                height: headerHeight - headerOverlap,
+                width: double.infinity,
+                child: header,
+              ),
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -94,6 +86,69 @@ class RedHeaderScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Görsel gelene kadar kırmızı zemin — yalnızca header clip alanında
+class _HeaderBackground extends StatelessWidget {
+  const _HeaderBackground({
+    this.asset,
+    this.overlayColors,
+  });
+
+  final String? asset;
+  final List<Color>? overlayColors;
+
+  @override
+  Widget build(BuildContext context) {
+    final overlay = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: overlayColors ??
+              [
+                AppColors.primary.withValues(alpha: 0.18),
+                AppColors.primary.withValues(alpha: 0.42),
+              ],
+        ),
+      ),
+    );
+
+    if (asset == null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(decoration: AppDecorations.redHeader()),
+          overlay,
+        ],
+      );
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(decoration: AppDecorations.redHeader()),
+        Image.asset(
+          asset!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          cacheWidth: 1200,
+          gaplessPlayback: true,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) return child;
+            return const SizedBox.expand();
+          },
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
+        overlay,
+      ],
+    );
+  }
+}
+
+void precacheRedHeaderBackground(BuildContext context) {
+  precacheImage(const AssetImage(AppAssets.dashboardHeaderBg), context);
 }
 
 /// kırmızı header içi başlık (geri / aksiyon opsiyonel)
@@ -113,12 +168,15 @@ class ThemedPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return SizedBox(
+      height: AppDecorations.pageHeaderContentHeight,
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
           Row(
             children: [
               if (onBack != null) ...[
@@ -159,6 +217,7 @@ class ThemedPageHeader extends StatelessWidget {
               ),
             ),
         ],
+        ),
       ),
     );
   }

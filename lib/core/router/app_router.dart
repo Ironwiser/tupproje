@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
@@ -14,6 +15,13 @@ import '../../features/premium/presentation/subscription_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 
+Page<void> _instantTabPage({required GoRouterState state, required Widget child}) {
+  return NoTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+  );
+}
+
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
@@ -29,43 +37,85 @@ final appRouter = GoRouter(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
-    GoRoute(
-      path: '/individual',
-      builder: (context, state) => const IndividualDashboardScreen(),
-    ),
-    GoRoute(
-      path: '/corporate',
-      builder: (context, state) => const CorporateDashboardScreen(),
-    ),
-    GoRoute(
-      path: '/expiry-calendar',
-      builder: (context, state) => const ExpiryCalendarScreen(),
-    ),
-    GoRoute(
-      path: '/extinguishers',
-      builder: (context, state) => const ExtinguisherListScreen(),
-      routes: [
-        GoRoute(
-          path: 'add',
-          builder: (context, state) => const AddEditExtinguisherScreen(),
-        ),
-        GoRoute(
-          path: ':id',
-          builder: (context, state) =>
-              ExtinguisherDetailScreen(id: state.pathParameters['id']!),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return SizedBox.expand(child: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
           routes: [
             GoRoute(
-              path: 'edit',
-              builder: (context, state) =>
-                  AddEditExtinguisherScreen(id: state.pathParameters['id']),
+              path: '/individual',
+              pageBuilder: (context, state) => _instantTabPage(
+                state: state,
+                child: const IndividualDashboardScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/extinguishers',
+              pageBuilder: (context, state) => _instantTabPage(
+                state: state,
+                child: const ExtinguisherListScreen(),
+              ),
+              routes: [
+                GoRoute(
+                  path: 'add',
+                  builder: (context, state) => const AddEditExtinguisherScreen(),
+                ),
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) =>
+                      ExtinguisherDetailScreen(id: state.pathParameters['id']!),
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      builder: (context, state) =>
+                          AddEditExtinguisherScreen(id: state.pathParameters['id']),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/notifications',
+              pageBuilder: (context, state) => _instantTabPage(
+                state: state,
+                child: const NotificationSettingsScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              pageBuilder: (context, state) => _instantTabPage(
+                state: state,
+                child: const ProfileScreen(),
+              ),
             ),
           ],
         ),
       ],
     ),
     GoRoute(
-      path: '/notifications',
-      builder: (context, state) => const NotificationSettingsScreen(),
+      path: '/corporate',
+      pageBuilder: (context, state) => _instantTabPage(
+        state: state,
+        child: const CorporateDashboardScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/expiry-calendar',
+      builder: (context, state) => const ExpiryCalendarScreen(),
     ),
     GoRoute(
       path: '/premium',
@@ -74,10 +124,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/subscription',
       builder: (context, state) => const SubscriptionScreen(),
-    ),
-    GoRoute(
-      path: '/profile',
-      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );

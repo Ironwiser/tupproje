@@ -23,8 +23,6 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
 
     if (extinguisher == null) {
       return RedHeaderScaffold(
-        headerHeight: 72,
-        headerOverlap: 16,
         headerBackgroundAsset: AppAssets.dashboardHeaderBg,
         header: ThemedPageHeader(
           title: 'Tüp detayı',
@@ -42,49 +40,51 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
         : '${extinguisher.daysUntilExpiry} gün kaldı';
 
     return RedHeaderScaffold(
-      headerHeight: 148,
-      headerOverlap: 20,
       headerBackgroundAsset: AppAssets.dashboardHeaderBg,
-      header: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.page, AppSpacing.xxs, AppSpacing.page, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surfaceMuted,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+      header: SizedBox(
+        height: AppDecorations.pageHeaderContentHeight,
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.page, 0, AppSpacing.page, AppSpacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.surfaceMuted,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppDecorations.radiusSm),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    extinguisher.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.headerTitle().copyWith(fontSize: 20, height: 1.15),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      extinguisher.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.headerTitle().copyWith(fontSize: 20, height: 1.15),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                ExtinguisherThumbnail(
-                  photoPath: extinguisher.photoPath,
-                  photoUrl: extinguisher.photoUrl,
-                  photoStoragePath: extinguisher.photoStoragePath,
-                  size: 56,
-                ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  ExtinguisherThumbnail(
+                    photoPath: extinguisher.photoPath,
+                    photoUrl: extinguisher.photoUrl,
+                    photoStoragePath: extinguisher.photoStoragePath,
+                    size: 56,
+                  ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -109,6 +109,7 @@ class ExtinguisherDetailScreen extends ConsumerWidget {
               ],
             ),
           ],
+          ),
         ),
       ),
       body: Container(
